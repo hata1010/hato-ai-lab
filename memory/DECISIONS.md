@@ -275,6 +275,8 @@ Cada nueva decisión deberá seguir esta estructura:
 
 ¿Qué cambia como resultado de esta decisión?
 
+con dios y la virgen siempre 
+
 ### Notas
 
 Información adicional relevante.
