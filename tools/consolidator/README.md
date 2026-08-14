@@ -81,7 +81,7 @@ La interpretación semántica y la extracción desde conversación pertenecen a 
 Desde la raíz del repositorio:
 
 ```bash
-python tools/consolidator/consolidator.py entrada.json
+python -m tools.consolidator.consolidator entrada.json
 ```
 
 También puede utilizarse `-` para recibir JSON desde stdin.
