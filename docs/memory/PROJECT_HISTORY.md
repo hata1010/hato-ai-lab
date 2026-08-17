@@ -136,6 +136,27 @@ De este descubrimiento surge el protocolo:
 
 La sincronización combina contexto disponible, memoria persistente y estado actual del repositorio antes de continuar una construcción cuando existe riesgo de desfase.
 
+### 14. Cierre de la primera fase operativa de memoria
+El 17 de agosto de 2026 se auditó el estado real de la arquitectura de memoria y se confirmó que el Consolidador determinista ya contaba con modelos, reglas, runner y pruebas. La auditoría identificó que su alcance corresponde correctamente a la Fase 1: recibe unidades de conocimiento previamente extraídas, determina relevancia, compara contra coincidencias explícitas y enruta el resultado sin promover automáticamente conocimiento a Memoria Fundacional.
+
+Se ampliaron las pruebas del Consolidador para cubrir actualización, obsolescencia y decisiones que requieren validación fundacional. También se incorporó un constructor determinista de `MEMORY_CHECKPOINT`, separado de la capa de persistencia, para generar checkpoints estructurados y trazables.
+
+Esta fase establece una separación explícita entre:
+
+```text
+EXTRACCIÓN DE CONOCIMIENTO
+        ↓
+CONSOLIDADOR DETERMINISTA
+        ↓
+MEMORIA EVOLUTIVA / REVISIÓN
+        ↓
+MEMORY_CHECKPOINT
+        ↓
+PERSISTENCIA VERSIONADA
+```
+
+La interpretación semántica de conversaciones y la automatización completa quedan reservadas para fases posteriores.
+
 ## Arquitectura conceptual de la memoria
 
 La evolución del proyecto establece una separación entre memoria fundacional y memoria evolutiva.
