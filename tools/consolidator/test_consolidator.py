@@ -19,6 +19,32 @@ class ConsolidatorRulesTest(unittest.TestCase):
         self.assertEqual(result.destination, "evolutionary_memory")
         self.assertFalse(result.requires_validation)
 
+    def test_update_goes_to_evolutionary_memory(self) -> None:
+        result = consolidate_item(
+            KnowledgeItem(
+                id="obs-update-001",
+                text="The memory status changed.",
+                classification="state",
+                existing_matches=["CURRENT_STATE.md"],
+            )
+        )
+        self.assertEqual(result.comparison, "update")
+        self.assertEqual(result.action, "record")
+        self.assertEqual(result.destination, "evolutionary_memory")
+
+    def test_obsolete_knowledge_is_recorded_as_evolution(self) -> None:
+        result = consolidate_item(
+            KnowledgeItem(
+                id="obs-obsolete-001",
+                text="An older implementation status is no longer current.",
+                classification="state",
+                existing_matches=["obsolete:IMPLEMENTATION_STATUS.md"],
+            )
+        )
+        self.assertEqual(result.comparison, "obsolete")
+        self.assertEqual(result.action, "record")
+        self.assertEqual(result.destination, "evolutionary_memory")
+
     def test_proposal_requires_validation(self) -> None:
         result = consolidate_item(
             KnowledgeItem(
@@ -28,6 +54,17 @@ class ConsolidatorRulesTest(unittest.TestCase):
             )
         )
         self.assertEqual(result.destination, "review")
+        self.assertTrue(result.requires_validation)
+
+    def test_decision_requires_foundational_validation(self) -> None:
+        result = consolidate_item(
+            KnowledgeItem(
+                id="decision-001",
+                text="Adopt the repository as the source of truth.",
+                classification="decision",
+            )
+        )
+        self.assertEqual(result.destination, "foundational_proposal")
         self.assertTrue(result.requires_validation)
 
     def test_duplicate_is_not_rewritten(self) -> None:
