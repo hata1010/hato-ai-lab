@@ -17,11 +17,20 @@
 - Contrato de `MEMORY_CHECKPOINT` definido.
 - Constructor determinista de `MEMORY_CHECKPOINT` implementado y probado.
 - Primer checkpoint histórico `MC-2026-08-14-001` conservado.
+- Runner de `Daily Commit` implementado en `tools/daily_commit.py`.
+- `Daily Commit` diseñado para limitar el commit al subsistema de continuidad y excluir cambios no relacionados.
+
+## Implementado, pendiente de validación operativa
+- Ejecución real de `tools/daily_commit.py --dry-run` en el checkout local.
+- Ejecución real de un commit diario de prueba en la máquina virtual.
+- Validación opcional del `--push` contra el remoto.
 
 ## Pendiente de fases posteriores
 - Extracción semántica automática desde conversaciones.
 - Persistencia automática de resultados del Consolidador.
 - Generación automática de checkpoints por condiciones de continuidad.
 - Recuperación y consulta de memoria para continuidad entre sesiones.
-- Commit diario automático.
 - Scheduler del proceso diario.
+- Integrity Check.
+- Recovery.
+- Audit Trail.
