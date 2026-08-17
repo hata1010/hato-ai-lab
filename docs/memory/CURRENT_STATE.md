@@ -1,9 +1,9 @@
 # Hato AI Architect — Estado actual
 
-**Fecha:** 2026-08-14
+**Fecha:** 2026-08-17
 
 ## Situación
-Hato AI Architect ya dispone de una integración GitHub funcional y de una primera memoria persistente. La siguiente fase consiste en convertir la memoria conceptual en un mecanismo operativo de consolidación.
+Hato AI Architect dispone de integración GitHub funcional y de una arquitectura de memoria evolutiva/fundacional. La primera fase operativa del ciclo de consolidación ya está implementada y auditada.
 
 ## Punto actual
 ```text
@@ -11,18 +11,23 @@ GitHub App/API       ✅
 Escritura            ✅
 Commit               ✅
 Memoria inicial      ✅
-Memoria histórica    🟡
-Consolidador          🟡
-MEMORY_CHECKPOINT     🟡
+Memoria histórica    ✅
+Consolidador Fase 1  ✅
+MEMORY_CHECKPOINT    ✅
 Commit diario         ⏳
 Scheduler             ⏳
 ```
 
+## Qué significa este estado
+- `PROJECT_HISTORY.md` conserva la evolución histórica relevante y fue actualizado con el cierre de la primera fase operativa de memoria.
+- El Consolidador determinista procesa unidades de conocimiento previamente extraídas, filtra relevancia, compara coincidencias explícitas y enruta resultados sin promover automáticamente conocimiento a Memoria Fundacional.
+- Las pruebas cubren nuevo conocimiento, actualización, obsolescencia, duplicado, contradicción, propuestas, decisiones e información irrelevante.
+- Existe un constructor determinista de `MEMORY_CHECKPOINT` que genera documentos estructurados y permite inyectar el commit desde la capa de persistencia.
+- La automatización de extracción semántica desde conversación, persistencia automática, commit diario y scheduler pertenece a las siguientes fases.
+
 ## Próxima secuencia
-1. Consolidar memoria histórica relevante.
-2. Implementar el consolidador.
-3. Probar filtrado de conversaciones mixtas.
-4. Implementar MEMORY_CHECKPOINT.
-5. Probar actualización de memoria mediante GitHub.
-6. Implementar commit diario automático.
-7. Programar y validar el scheduler.
+1. Validar la suite de pruebas en el entorno del repositorio.
+2. Vincular el checkpoint de cierre con su commit de persistencia.
+3. Implementar el commit diario automático.
+4. Programar y validar el scheduler.
+5. Diseñar recuperación y consulta de memoria para continuidad entre sesiones.
