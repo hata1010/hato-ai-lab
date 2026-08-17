@@ -10,16 +10,18 @@
 - `HATO_AI_ARCHITECT_TEST.md` creado y conservado.
 - `docs/memory/PROJECT_MEMORY.md` creado.
 - Estructura conceptual de memoria definida.
-- Concepto `MEMORY_CHECKPOINT` definido.
+- Contrato del Consolidador definido.
+- Consolidador determinista Fase 1 implementado.
+- Pruebas del Consolidador ampliadas para rutas de nuevo, actualización, obsolescencia, duplicado, contradicción, propuesta, decisión e irrelevancia.
+- Memoria histórica consolidada y actualizada.
+- Contrato de `MEMORY_CHECKPOINT` definido.
+- Constructor determinista de `MEMORY_CHECKPOINT` implementado y probado.
+- Primer checkpoint histórico `MC-2026-08-14-001` conservado.
 
-## En construcción
-- Memoria histórica consolidada.
-- Consolidador de memoria.
-- Detección de relevancia y filtrado por tema.
-- Actualización segura de documentos de memoria.
-
-## Pendiente
+## Pendiente de fases posteriores
+- Extracción semántica automática desde conversaciones.
+- Persistencia automática de resultados del Consolidador.
+- Generación automática de checkpoints por condiciones de continuidad.
+- Recuperación y consulta de memoria para continuidad entre sesiones.
 - Commit diario automático.
 - Scheduler del proceso diario.
-- Mecanismo automático de MEMORY_CHECKPOINT.
-- Recuperación y consulta de memoria para continuidad entre sesiones.
