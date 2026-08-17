@@ -1,0 +1,37 @@
+name: Test Hato AI Architect Write and Commit
+
+on:
+  workflow_dispatch:
+
+jobs:
+  write-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.HATO_AI_ARCHITECT_APP_ID }}
+          private-key: ${{ secrets.HATO_AI_ARCHITECT_PRIVATE_KEY }}
+          owner: hata1010
+          repositories: hato-ai-lab
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - name: Configure Git identity
+        run: |
+          git config user.name "Hato AI Architect"
+          git config user.email "hato-ai-architect[bot]@users.noreply.github.com"
+
+      - name: Create continuity test change
+        run: |
+          mkdir -p memory
+          printf 'HATO_WRITE_COMMIT_TEST: %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > memory/daily_commit_actions_test.txt
+
+      - name: Run daily commit
+        run: python tools/daily_commit.py --push
