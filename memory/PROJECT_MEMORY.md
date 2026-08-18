@@ -91,6 +91,8 @@ VALIDAR
    ↓
 RESULTADO
 
+---
+
 ## 6. ARQUITECTURA ACTUAL
 
 Aplicaciones principales:
@@ -282,3 +284,124 @@ Principios establecidos:
 
 Este protocolo surge de la experiencia operativa del 2026-08-18 y
 queda establecido como criterio para las siguientes sesiones.
+
+---
+
+## 16. CONCLUSIONES DEL EXPERIMENTO ENGINE + GMD + AUDITORÍA IA
+
+Fecha: 2026-08-18
+Estado: CERRADO COMO ETAPA EXPERIMENTAL
+
+Durante la etapa se realizó una revisión del motor de métricas y se
+consultaron dos IAs sobre cómo construir la métrica Ganancia Media
+Diaria (GMD) utilizando la arquitectura existente.
+
+### 16.1 Hallazgo principal sobre el Engine
+
+El proyecto no debe entenderse como un catálogo terminado de métricas
+individuales. El activo arquitectónico principal es el mecanismo que
+permite construir métricas mediante funciones de dominio y composición.
+
+Se identifican como piezas relevantes del Engine:
+
+- funciones de dominio;
+- `FuncionBase`;
+- `Compositor`;
+- `PlanMetrica`;
+- `Mapear` y funciones de agregación;
+- evaluador AST seguro con `Decimal`;
+- mecanismo de explicación de la composición;
+- interfaz HTML temporal utilizada como laboratorio para probar
+  composiciones del motor.
+
+Por tanto, una métrica como GMD debe utilizar primero las capacidades
+existentes del Engine. No se debe crear prematuramente una función
+monolítica que oculte las capacidades que ya posee el motor.
+
+### 16.2 GMD: estado y siguiente objetivo
+
+La métrica Ganancia Media Diaria (GMD) todavía NO está formalizada como
+métrica terminada.
+
+El siguiente objetivo técnico es construir GMD como caso de prueba
+real del Engine, partiendo de las funcionalidades existentes.
+
+La secuencia esperada es:
+
+Pesajes
+  ↓
+funciones de dominio existentes
+  ↓
+composición
+  ↓
+PlanMetrica
+  ↓
+ejecución
+  ↓
+explicación
+  ↓
+resultado GMD
+
+Solo si el Engine no dispone de una operación necesaria se deberá
+identificar y diseñar esa nueva capacidad de forma explícita.
+
+La interfaz HTML temporal debe recuperarse como laboratorio de prueba
+antes de modificar el dashboard definitivo.
+
+### 16.3 Resultado del contraste entre dos IAs
+
+Las dos IAs produjeron diagnósticos diferentes sobre la arquitectura.
+Una pudo identificar componentes concretos del Engine y detectar una
+incompatibilidad real de interoperabilidad (`Mapear` utiliza la clave
+`funcion`, no `funcion_elemento`), además de distinguir entre el
+contrato conceptual de métricas y la implementación de `PlanMetrica`.
+
+La segunda IA trabajó con una visión más limitada del repositorio y
+concluyó que varios componentes no existían. Este resultado no debe
+interpretarse automáticamente como que la arquitectura no existe:
+representa una limitación de evidencia disponible para esa IA.
+
+Conclusión metodológica:
+
+Las auditorías realizadas por IA deben distinguir explícitamente entre:
+
+- HECHO VERIFICADO;
+- INFERENCIA;
+- SUPUESTO;
+- DESCONOCIDO POR FALTA DE EVIDENCIA.
+
+Una futura auditoría automática del proyecto deberá proporcionar, cuando
+sea posible, evidencia reproducible: ruta de archivo, símbolo encontrado,
+commit/ref y resultado de la comprobación.
+
+### 16.4 Visión futura de auditoría autónoma
+
+Se establece como línea futura que el propio sistema Hato AI Lab pueda
+analizar su repositorio y señalar:
+
+- inconsistencias entre código y contratos;
+- fallas detectables;
+- pruebas faltantes;
+- automatizaciones potencialmente útiles;
+- discrepancias entre el estado documentado y el estado real.
+
+El principio de seguridad para esta capacidad será inicialmente:
+
+LEER → COMPARAR → DETECTAR → EXPLICAR → PROPONER → ESPERAR APROBACIÓN
+HUMANA.
+
+La modificación automática del código podrá evaluarse posteriormente,
+cuando exista suficiente evidencia y control.
+
+### 16.5 Cierre de la etapa
+
+Esta etapa queda cerrada sin implementar todavía GMD.
+
+No se considera un fracaso: el experimento permitió validar que el
+Engine existente puede ser analizado como arquitectura de composición,
+identificar puntos de interoperabilidad y definir una metodología más
+rigurosa para evaluar IAs sobre el repositorio.
+
+Próxima etapa:
+recuperar el estado real del Engine y del HTML temporal de pruebas,
+y construir GMD utilizando primero las funciones existentes.
