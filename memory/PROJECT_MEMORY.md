@@ -244,3 +244,41 @@ No utilizarlo como diario de conversación.
 
 La memoria debe conservar el conocimiento estructural del proyecto,
 no cada detalle temporal del desarrollo.
+
+---
+
+## 15. PROTOCOLO DE CONTINUIDAD Y COORDINACIÓN HUMANO–IA
+
+El proyecto ha identificado una necesidad operativa crítica:
+la memoria persistente debe evitar que el trabajo dependa de la
+continuidad de una conversación concreta.
+
+Principios establecidos:
+
+1. El repositorio es la fuente de verdad del proyecto; la conversación
+   es un medio de trabajo, no la memoria principal.
+2. Cuando exista incertidumbre sobre una decisión anterior, se debe
+   consultar primero la memoria y el estado real del repositorio,
+   antes de inferir o inventar contexto.
+3. Cada componente de trabajo debe manejarse con estados verificables:
+   EN CONSTRUCCIÓN → EN PRUEBA → CERRADO.
+4. Una tarea que requiera participación humana debe indicar de forma
+   explícita: qué ejecutar, dónde ejecutarlo, qué resultado se espera
+   y qué evidencia debe devolverse para cerrar la tarea.
+5. No se debe pedir al desarrollador que espere indefinidamente sin
+   una razón técnica concreta. Si su participación es necesaria, debe
+   solicitarse en el momento en que desbloquea el trabajo.
+6. Las decisiones arquitectónicas importantes deben persistirse en
+   memoria antes de ejecutar cambios potencialmente destructivos.
+7. No usar `git push --force` ni reemplazar historias remotas sin
+   comprobar primero la historia y la estructura existentes.
+8. La integración del código Hato con Hato AI Lab debe conservar la
+   memoria, documentación, herramientas y automatización existentes.
+9. El código Django de Hato pertenece conceptualmente al laboratorio,
+   dentro del área destinada al código, separado de memoria,
+   documentación, herramientas y automatización.
+10. La consolidación de sesiones es parte funcional del sistema de
+    memoria, no una actividad opcional.
+
+Este protocolo surge de la experiencia operativa del 2026-08-18 y
+queda establecido como criterio para las siguientes sesiones.
