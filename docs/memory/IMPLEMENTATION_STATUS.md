@@ -29,6 +29,8 @@
 - **2.6 Resolución de conflictos — preservación histórica y validación de Memoria Fundacional formalizadas.**
 - **2.7 Generador de propuesta — contrato de propuesta estructurada, aprobación y trazabilidad definido y cerrado.**
 - **2.8 Persistencia controlada — contrato de escritura autorizada, validación, atomicidad, auditoría y destinos de memoria definido y cerrado.**
+- **2.9 Checkpoint posterior — contrato de creación de punto de recuperación después de consolidación válida definido y cerrado.**
+- **2.10 Audit Trail — contrato de trazabilidad de entrada, decisiones, modificaciones, errores y checkpoint definido y cerrado.**
 
 ## Implementado, pendiente de validación operativa
 - Ejecución real de `tools/daily_commit.py --dry-run` en el checkout local.
@@ -42,10 +44,10 @@
 - Implementación concreta de Resolución de Conflictos respetando el contrato 2.6.
 - Implementación concreta del Generador de Propuestas respetando el contrato 2.7.
 - Implementación concreta de Persistencia Controlada respetando el contrato 2.8.
-- Persistencia automática de resultados del Consolidador.
+- Implementación concreta de Checkpoint Posterior respetando el contrato 2.9.
+- Implementación concreta de Audit Trail respetando el contrato 2.10.
 - Generación automática de checkpoints por condiciones de continuidad.
 - Recuperación y consulta de memoria para continuidad entre sesiones.
 - Scheduler del proceso diario.
 - Integrity Check.
 - Recovery.
-- Audit Trail.
