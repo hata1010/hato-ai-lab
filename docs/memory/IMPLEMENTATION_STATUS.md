@@ -21,6 +21,8 @@
 - `Daily Commit` diseñado para limitar el commit al subsistema de continuidad y excluir cambios no relacionados.
 - **2.3 Estructurador — contrato JSON definido y cerrado.**
 - **2.3 Estructurador — interfaz formalizada entre Extractor Semántico y Consolidador.**
+- **2.4 Clasificador inteligente — contrato de clasificación, destino de memoria y revisión definido y cerrado.**
+- **2.4 Clasificador inteligente — interfaz formalizada entre Estructurador y Consolidador.**
 
 ## Implementado, pendiente de validación operativa
 - Ejecución real de `tools/daily_commit.py --dry-run` en el checkout local.
@@ -29,6 +31,7 @@
 
 ## Pendiente de fases posteriores
 - Extracción semántica automática desde conversaciones.
+- Implementación concreta de un modelo IA para clasificación inteligente respetando el contrato 2.4.
 - Persistencia automática de resultados del Consolidador.
 - Generación automática de checkpoints por condiciones de continuidad.
 - Recuperación y consulta de memoria para continuidad entre sesiones.
