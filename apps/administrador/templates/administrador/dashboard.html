@@ -1,0 +1,325 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}
+Dashboard | Gestión Ganadera
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Administración de la Finca</h1>
+        <p>Panel general de gestión ganadera</p>
+    </div>
+</div>
+
+
+<!-- FINCA ACTIVA -->
+
+<div class="finca-selector">
+
+    <div>
+        <span>FINCA ACTIVA</span>
+
+        <strong>
+            Seleccionar finca
+        </strong>
+    </div>
+
+    <button type="button">
+        ▼
+    </button>
+
+</div>
+
+
+<!-- INDICADORES -->
+
+<section class="cards">
+
+    <div class="card">
+
+        <div class="card-icon">
+            🐄
+        </div>
+
+        <div>
+            <span>GANADO</span>
+
+            <strong>0</strong>
+
+            <small>
+                Animales registrados
+            </small>
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">
+            🌱
+        </div>
+
+        <div>
+            <span>POTREROS</span>
+
+            <strong>0</strong>
+
+            <small>
+                Potreros registrados
+            </small>
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">
+            ❤️
+        </div>
+
+        <div>
+            <span>SALUD</span>
+
+            <strong>0</strong>
+
+            <small>
+                Eventos pendientes
+            </small>
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-icon">
+            📦
+        </div>
+
+        <div>
+            <span>RECURSOS</span>
+
+            <strong>0</strong>
+
+            <small>
+                Recursos registrados
+            </small>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- CONTENIDO PRINCIPAL -->
+
+<section class="dashboard-grid">
+
+
+    <!-- MAPA -->
+
+    <div class="panel map-panel">
+
+        <div class="panel-header">
+
+            <div>
+                <h2>Mapa de la finca</h2>
+
+                <span>
+                    Distribución geográfica de la explotación
+                </span>
+            </div>
+
+            <button class="panel-button">
+                Ver mapa
+            </button>
+
+        </div>
+
+
+        <div id="map">
+
+            <div class="map-placeholder">
+
+                <div class="map-icon">
+                    🗺️
+                </div>
+
+                <p>
+                    El mapa GIS de la finca aparecerá aquí
+                </p>
+
+                <small>
+                    Finca · Potreros · Ubicación
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ACTIVIDAD -->
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <div>
+
+                <h2>Actividad reciente</h2>
+
+                <span>
+                    Últimos eventos registrados
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="activity">
+
+
+            <div class="activity-item">
+
+                <span class="activity-icon">
+                    🐄
+                </span>
+
+                <div>
+
+                    <strong>
+                        Ganado
+                    </strong>
+
+                    <p>
+                        No hay actividad registrada.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="activity-item">
+
+                <span class="activity-icon">
+                    ⚖️
+                </span>
+
+                <div>
+
+                    <strong>
+                        Pesajes
+                    </strong>
+
+                    <p>
+                        No hay pesajes recientes.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="activity-item">
+
+                <span class="activity-icon">
+                    ❤️
+                </span>
+
+                <div>
+
+                    <strong>
+                        Salud animal
+                    </strong>
+
+                    <p>
+                        No hay eventos recientes.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="activity-item">
+
+                <span class="activity-icon">
+                    📦
+                </span>
+
+                <div>
+
+                    <strong>
+                        Recursos
+                    </strong>
+
+                    <p>
+                        No hay movimientos registrados.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ACCIONES RÁPIDAS -->
+
+<section class="panel quick-panel">
+
+    <div class="panel-header">
+
+        <div>
+
+            <h2>Acciones rápidas</h2>
+
+            <span>
+                Operaciones frecuentes
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="quick-actions">
+
+        <button>
+            🐄 Registrar animal
+        </button>
+
+        <button>
+            🌱 Gestionar potrero
+        </button>
+
+        <button>
+            ⚖️ Registrar pesaje
+        </button>
+
+        <button>
+            ❤️ Registrar evento de salud
+        </button>
+
+        <button>
+            📦 Gestionar recursos
+        </button>
+
+    </div>
+
+</section>
+
+{% endblock %}

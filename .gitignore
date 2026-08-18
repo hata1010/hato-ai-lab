@@ -1,0 +1,43 @@
+# Entorno virtual
+.venv/
+venv/
+env/
+
+# Base de datos local SQLite (histórica, no es la BD actual)
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Variables y secretos
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Django
+staticfiles/
+media/
+
+# IDE / editores
+.vscode/
+.idea/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos temporales
+*.tmp
+*.bak
+*.swp
+
+# Copias de seguridad locales
+*.backup
