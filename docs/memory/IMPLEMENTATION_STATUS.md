@@ -23,6 +23,10 @@
 - **2.3 Estructurador — interfaz formalizada entre Extractor Semántico y Consolidador.**
 - **2.4 Clasificador inteligente — contrato de clasificación, destino de memoria y revisión definido y cerrado.**
 - **2.4 Clasificador inteligente — interfaz formalizada entre Estructurador y Consolidador.**
+- **2.5 Comparador de memoria — contrato de comparación contra memoria existente definido y cerrado.**
+- **2.5 Comparador de memoria — resultados NEW, UPDATE, DUPLICATE, CONTRADICTION, OBSOLETE y REVIEW formalizados.**
+- **2.6 Resolución de conflictos — contrato de detección, tratamiento y escalamiento de contradicciones definido y cerrado.**
+- **2.6 Resolución de conflictos — preservación histórica y validación de Memoria Fundacional formalizadas.**
 
 ## Implementado, pendiente de validación operativa
 - Ejecución real de `tools/daily_commit.py --dry-run` en el checkout local.
@@ -32,6 +36,8 @@
 ## Pendiente de fases posteriores
 - Extracción semántica automática desde conversaciones.
 - Implementación concreta de un modelo IA para clasificación inteligente respetando el contrato 2.4.
+- Implementación concreta del Comparador de Memoria respetando el contrato 2.5.
+- Implementación concreta de Resolución de Conflictos respetando el contrato 2.6.
 - Persistencia automática de resultados del Consolidador.
 - Generación automática de checkpoints por condiciones de continuidad.
 - Recuperación y consulta de memoria para continuidad entre sesiones.
