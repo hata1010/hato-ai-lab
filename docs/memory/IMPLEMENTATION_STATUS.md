@@ -19,6 +19,8 @@
 - Primer checkpoint histórico `MC-2026-08-14-001` conservado.
 - Runner de `Daily Commit` implementado en `tools/daily_commit.py`.
 - `Daily Commit` diseñado para limitar el commit al subsistema de continuidad y excluir cambios no relacionados.
+- **2.3 Estructurador — contrato JSON definido y cerrado.**
+- **2.3 Estructurador — interfaz formalizada entre Extractor Semántico y Consolidador.**
 
 ## Implementado, pendiente de validación operativa
 - Ejecución real de `tools/daily_commit.py --dry-run` en el checkout local.
