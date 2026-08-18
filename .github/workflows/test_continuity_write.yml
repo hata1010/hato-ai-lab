@@ -2,6 +2,11 @@ name: Test Hato AI Architect Write and Commit
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '10 1 * * *'
+    - cron: '25 1 * * *'
+    - cron: '40 1 * * *'
+    - cron: '55 1 * * *'
 
 jobs:
   write-commit:
