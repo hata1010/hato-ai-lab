@@ -33,6 +33,7 @@
 - **2.10 Audit Trail — contrato de trazabilidad de entrada, decisiones, modificaciones, errores y checkpoint definido y cerrado.**
 - **2.11 Pruebas de Fase 2 — matriz de pruebas unitarias, integración, conflictos y criterios de aceptación definida y cerrada.**
 - **2.12 E2E del Consolidator — escenarios, invariantes y evidencias de extremo a extremo definidos y cerrados.**
+- **3.1 Modelo de métrica — definición, componentes, unidad, periodicidad, contexto, tipos e invariantes formalizados y cerrados.**
 
 ## Implementado, pendiente de validación operativa
 - Ejecución real de `tools/daily_commit.py --dry-run` en el checkout local.
@@ -50,6 +51,7 @@
 - Implementación concreta de Audit Trail respetando el contrato 2.10.
 - Implementación y ejecución automatizada de la suite de pruebas de Fase 2 (2.11).
 - Implementación y ejecución automatizada del E2E del Consolidator (2.12).
+- Implementación del DSL de métricas (3.2) y sus componentes posteriores.
 - Generación automática de checkpoints por condiciones de continuidad.
 - Recuperación y consulta de memoria para continuidad entre sesiones.
 - Scheduler del proceso diario.
