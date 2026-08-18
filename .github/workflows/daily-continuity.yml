@@ -25,6 +25,11 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Show execution timezone
+        run: |
+          echo "UTC: $(date -u '+%Y-%m-%d %H:%M:%S %Z')"
+          echo "Runner: $(date '+%Y-%m-%d %H:%M:%S %Z')"
+
       - name: Run integrity check
         run: python tools/integrity_check.py
 
@@ -32,12 +37,7 @@ jobs:
         run: python tools/recovery.py
 
       - name: Record audit trail
-        run: python tools/audit_trail.py
+        run: python tools/audit_trail.py --event continuity_workflow --status PASS --detail "integrity and recovery checks passed"
 
       - name: Run daily continuity commit
         run: python tools/daily_commit.py --push
-
-      - name: Show execution timezone
-        run: |
-          echo "UTC: $(date -u '+%Y-%m-%d %H:%M:%S %Z')"
-          echo "Runner: $(date '+%Y-%m-%d %H:%M:%S %Z')"
