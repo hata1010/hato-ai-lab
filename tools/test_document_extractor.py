@@ -1,7 +1,9 @@
 """Pruebas base del extractor documental de la Fase 4."""
 
+from io import BytesIO
 import hashlib
 import unittest
+import zipfile
 
 from document_extractor import DocumentExtractor, UnsupportedDocumentError
 
@@ -17,9 +19,12 @@ class DocumentExtractorTests(unittest.TestCase):
         png_signature = b"\x89PNG\r\n\x1a\n"
         self.assertEqual(self.extractor.detect_type(png_signature, "archivo.bin"), "image")
 
-    def test_detect_docx_requires_zip_container(self):
+    def test_detect_docx_by_zip_container(self):
+        stream = BytesIO()
+        with zipfile.ZipFile(stream, "w") as archive:
+            archive.writestr("[Content_Types].xml", "")
         self.assertEqual(
-            self.extractor.detect_type(b"PK\x03\x04", "archivo.docx"),
+            self.extractor.detect_type(stream.getvalue(), "archivo.docx"),
             "docx",
         )
 
