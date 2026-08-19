@@ -1,6 +1,6 @@
 # Protocolo de Comunicación y Diccionario de Conceptos — Hato AI Lab
 
-**Versión:** 1.0  
+**Versión:** 1.1  
 **Estado:** Vigente  
 **Propósito:** establecer un lenguaje común y reglas de trabajo para cualquier IA que participe en Hato AI Lab.
 
@@ -171,7 +171,63 @@ Toda métrica candidata debe poder describirse mediante, como mínimo:
 
 Una métrica no se considera implementada únicamente porque exista en un documento, mockup o ejemplo HTML.
 
-## 9. Protocolo de cierre
+### 8.1 Precisión numérica
+
+Toda métrica que involucre moneda, pesos, tasas zootécnicas u otros valores cuantitativos sensibles debe utilizar **`Decimal`** o enteros cuando corresponda, evitando `float` nativo en el núcleo del motor cuando pueda afectar la precisión.
+
+Cada métrica debe definir explícitamente, cuando aplique, su precisión, escala y criterio de redondeo. No se establece un número universal de decimales para todas las métricas.
+
+## 9. Higiene de Git y seguridad
+
+Ninguna IA debe sugerir, generar para commit o incluir en cambios del repositorio archivos que contengan secretos, credenciales o artefactos locales de ejecución.
+
+No deben incorporarse, salvo una excepción explícitamente documentada y justificada:
+
+- archivos `.env`;
+- bases de datos locales como `*.sqlite3`;
+- llaves privadas como `*.pem` o `*.key`;
+- credenciales, tokens o secretos;
+- directorios de caché como `__pycache__/`;
+- artefactos temporales generados por herramientas.
+
+Los cambios deben limitarse a código fuente, pruebas, contratos, documentación, configuraciones necesarias y otros artefactos expresamente incluidos en el alcance de la subtarea.
+
+## 10. Protocolo ante interrupciones
+
+Si una subtarea queda parcialmente ejecutada, una respuesta se interrumpe, una herramienta falla o un comando termina por timeout, la IA **no debe declarar la subtarea como completada**.
+
+El estado debe marcarse explícitamente como:
+
+- `EN_PROGRESO`, si el trabajo puede continuar;
+- `BLOQUEADO`, si existe una condición que impide continuar;
+- `REQUIERE_CORRECCION`, si existe un resultado parcial que debe corregirse.
+
+El cierre parcial debe indicar exactamente:
+
+- último paso completado;
+- paso en el que se detuvo;
+- archivos modificados;
+- pruebas ejecutadas y resultado;
+- problema que impide continuar, si existe;
+- siguiente acción necesaria.
+
+Esto permite retomar el trabajo sin repetir pasos ni asumir que algo fue completado cuando no lo fue.
+
+## 11. Convención estándar para pruebas
+
+Toda entrega que incluya código funcional debe indicar el **comando exacto utilizado para reproducir la evidencia de prueba**.
+
+Cuando sea aplicable, debe indicarse también:
+
+- entorno utilizado;
+- resultado esperado;
+- resultado observado;
+- si la prueba pasó o falló;
+- limitaciones conocidas.
+
+El objetivo es que otra IA o desarrollador pueda reproducir la validación con un comando claro y sin depender de explicaciones informales del chat.
+
+## 12. Protocolo de cierre
 
 El cierre de una subtarea debe utilizar esta estructura:
 
@@ -198,13 +254,13 @@ SIGUIENTE NODO:
 <subtarea siguiente según planificación>
 ```
 
-## 10. Regla de lenguaje
+## 13. Regla de lenguaje
 
 La documentación del proyecto debe utilizar términos genéricos y funcionales. No deben registrarse nombres internos utilizados por el equipo humano para identificar agentes concretos, salvo que exista una razón arquitectónica explícita.
 
 El objetivo es que cualquier IA futura pueda incorporarse al proyecto leyendo este protocolo y la memoria, sin depender de conocer conversaciones privadas anteriores.
 
-## 11. Regla final
+## 14. Regla final
 
 **Primero se entiende el estado real. Luego se ejecuta la tarea. Después se verifica. Finalmente se registra el conocimiento que deba sobrevivir.**
 
