@@ -65,6 +65,22 @@ Para DOCX se evaluará extracción de párrafos, títulos, tablas, imágenes, or
 
 Crear un PDF controlado con título, texto, tabla e imagen y verificar qué componentes puede extraer el sistema.
 
+**Ejecución realizada:** se creó un PDF controlado de una página con título, texto, tabla de datos e imagen. La prueba se ejecutó con `pypdf 5.9.0` y `pdfplumber 0.11.9`.
+
+**Resultados observados:**
+
+| Componente | Resultado |
+|---|---|
+| Identificación del PDF | ✅ Detectado por firma PDF |
+| Número de páginas | ✅ 1 |
+| Metadatos | ✅ Título y autor recuperados |
+| Texto | ✅ Extraído correctamente |
+| Tabla | ✅ Detectada y extraída: 4 filas × 2 columnas |
+| Imagen | ✅ 1 imagen detectada y recuperada |
+| Estructura básica | ✅ Página y elementos extraídos en orden |
+
+**Conclusión 4.4:** la prueba PDF universal fue satisfactoria. El extractor V1 demuestra que puede convertir un PDF controlado con texto, tabla, imagen y metadatos en una representación estructurada. No se detectó una limitación que requiera modificar el contrato documental en esta subfase.
+
 ### 4.5 — Prueba DOCX
 
 Crear un DOCX controlado con título, texto, tabla, imagen y texto adicional y verificar la extracción.
@@ -127,4 +143,5 @@ La fase se considerará cerrada cuando exista evidencia de que los formatos defi
 - Subfase 4.1: especificación inicial documentada y tareas iniciales ejecutadas.
 - Subfase 4.2: contrato/modelo documental definido.
 - Subfase 4.3: extractor documental V1 implementado y pruebas iniciales añadidas.
-- Próximo paso: ejecutar 4.4 con un PDF universal controlado.
+- Subfase 4.4: **cerrada satisfactoriamente** con PDF universal controlado.
+- Próximo paso: ejecutar 4.5 con un DOCX controlado.
