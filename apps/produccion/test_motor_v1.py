@@ -2,42 +2,32 @@
 import unittest
 from datetime import date
 from decimal import Decimal
-
 from apps.produccion.engine.catalogo_v1 import obtener_metrica_v1
 from apps.produccion.engine.ejecutor import EjecutorMotorV1
 
 class MockPesaje:
-    def __init__(self, peso_kg, fecha):
-        self.peso_kg=Decimal(str(peso_kg)); self.fecha=fecha
-
+    def __init__(self,peso_kg,fecha): self.peso_kg=Decimal(str(peso_kg)); self.fecha=fecha
 class MockAnimal:
-    def __init__(self, numero_arete, sexo="H", estado="activo", pesajes=None):
-        self.numero_arete=numero_arete; self.sexo=sexo; self.estado=estado; self._pesajes=pesajes or []
+    def __init__(self,numero_arete,sexo="H",estado="activo",pesajes=None): self.numero_arete=numero_arete; self.sexo=sexo; self.estado=estado; self._pesajes=pesajes or []
     @property
     def pesajes(self):
         items=self._pesajes
         class MockQuerySet:
-            def __init__(self, items): self._items=items
-            def order_by(self, field):
-                rev=field.startswith("-"); f=field.lstrip("-")
-                return MockQuerySet(sorted(self._items,key=lambda x:getattr(x,f),reverse=rev))
+            def __init__(self,items): self._items=items
+            def order_by(self,field):
+                rev=field.startswith("-"); f=field.lstrip("-"); return MockQuerySet(sorted(self._items,key=lambda x:getattr(x,f),reverse=rev))
             def first(self): return self._items[0] if self._items else None
-            def __getitem__(self, value): return self._items[value]
+            def __getitem__(self,value): return self._items[value]
         return MockQuerySet(items)
 
 class TestMotorMetricasV1(unittest.TestCase):
     def setUp(self):
         self.ejecutor=EjecutorMotorV1()
         self.animales=[
-            MockAnimal("H001","H","activo",[MockPesaje("200",date(2026,6,1))]),
-            MockAnimal("H002","H","activo",[MockPesaje("300",date(2026,6,1))]),
-            MockAnimal("H003","H","activo",[MockPesaje("400",date(2026,6,1))]),
-            MockAnimal("H004","H","activo"), MockAnimal("H005","H","activo"), MockAnimal("H006","H","activo"),
-            MockAnimal("H007","H","vendido",[MockPesaje("800",date(2026,6,1))]),
-            MockAnimal("M001","M","activo"), MockAnimal("M002","M","activo"), MockAnimal("M003","M","activo"), MockAnimal("M004","M","activo"),
-            MockAnimal("M005","M","muerto",[MockPesaje("900",date(2026,6,1))]),
+            MockAnimal("H001","H","activo",[MockPesaje("200",date(2026,6,1))]),MockAnimal("H002","H","activo",[MockPesaje("300",date(2026,6,1))]),MockAnimal("H003","H","activo",[MockPesaje("400",date(2026,6,1))]),
+            MockAnimal("H004","H","activo"),MockAnimal("H005","H","activo"),MockAnimal("H006","H","activo"),MockAnimal("H007","H","vendido",[MockPesaje("800",date(2026,6,1))]),
+            MockAnimal("M001","M","activo"),MockAnimal("M002","M","activo"),MockAnimal("M003","M","activo"),MockAnimal("M004","M","activo"),MockAnimal("M005","M","muerto",[MockPesaje("900",date(2026,6,1))]),
         ]
-
     def test_01_cant_animales_total(self):
         r=self.ejecutor.ejecutar(obtener_metrica_v1("CANT_ANIMALES_TOTAL"),self.animales); self.assertTrue(r.es_valido); self.assertEqual(r.valor,12)
     def test_02_cant_animales_activos(self):
@@ -61,6 +51,8 @@ class TestMotorMetricasV1(unittest.TestCase):
     def test_11_gmd_mismo_dia(self):
         a=MockAnimal("MISMO_DIA",pesajes=[MockPesaje("205",date(2026,6,1)),MockPesaje("200",date(2026,6,1))]); r=self.ejecutor.ejecutar(obtener_metrica_v1("GMD_INDIVIDUAL"),a); self.assertFalse(r.es_valido); self.assertIn("Intervalo de fechas inválido",r.error)
     def test_12_promedio_sin_pesajes(self):
-        a=[MockAnimal("S1"),MockAnimal("S2")]; r=self.ejecutor.ejecutar(obtener_metrica_v1("PESO_PROMEDIO_FINCA"),a); self.assertFalse(r.es_valido); self.assertIn("No existen valores para calcular el promedio",r.error)
+        r=self.ejecutor.ejecutar(obtener_metrica_v1("PESO_PROMEDIO_FINCA"),[MockAnimal("S1"),MockAnimal("S2")]); self.assertFalse(r.es_valido); self.assertIn("No existen valores para calcular el promedio",r.error)
+    def test_13_carga_cero_hectareas(self):
+        r=self.ejecutor.ejecutar(obtener_metrica_v1("CARGA_ANIMAL_HA"),{"animales":10,"hectareas":0}); self.assertFalse(r.es_valido); self.assertIn("no puede ser menor o igual a cero",r.error)
 
 if __name__ == "__main__": unittest.main()
