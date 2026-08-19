@@ -15,11 +15,9 @@ from dataclasses import dataclass, field
 from hashlib import sha256
 from pathlib import Path
 from typing import Any, BinaryIO, Iterable
-import mimetypes
 import zipfile
 
 
-SUPPORTED_TYPES = {"pdf", "docx", "image"}
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tif", ".tiff", ".webp"}
 
 
@@ -138,8 +136,7 @@ class DocumentExtractor:
 
         for page_number, page in enumerate(reader.pages, start=1):
             text = page.extract_text() or ""
-            page_info = {"numero": page_number, "texto": bool(text.strip())}
-            pages.append(page_info)
+            pages.append({"numero": page_number, "texto": bool(text.strip())})
             if text.strip():
                 text_blocks.append({"pagina": page_number, "texto": text})
                 elements.append(DocumentElement("texto", order, text, page_number))
@@ -165,8 +162,8 @@ class DocumentExtractor:
                 elements.append(DocumentElement("imagen", order, item, page_number))
                 order += 1
 
-            # pdfplumber se usa solo cuando está disponible: las tablas PDF
-            # no tienen una representación universal en pypdf.
+            # pdfplumber es opcional: las tablas PDF no tienen una
+            # representación universal en pypdf.
             try:
                 import pdfplumber  # type: ignore
             except ImportError:
@@ -183,7 +180,11 @@ class DocumentExtractor:
         return DocumentModel(
             identificacion=identification,
             metadatos=metadata,
-            estructura={"paginas": pages, "numero_paginas": len(reader.pages), "orden": [e.orden for e in elements]},
+            estructura={
+                "paginas": pages,
+                "numero_paginas": len(reader.pages),
+                "orden": [e.orden for e in elements],
+            },
             texto=text_blocks,
             tablas=tables,
             imagenes=images,
@@ -221,7 +222,7 @@ class DocumentExtractor:
         elements: list[DocumentElement] = []
         order = 0
 
-        # Iteración XML conserva el orden relativo de párrafos y tablas.
+        # El recorrido XML conserva el orden relativo de párrafos y tablas.
         from docx.document import Document as DocumentClass
         from docx.table import Table
         from docx.text.paragraph import Paragraph
@@ -235,35 +236,62 @@ class DocumentExtractor:
                 elif child.tag == qn("w:tbl"):
                     yield Table(child, parent)
 
+        def paragraph_image_relationships(paragraph: Paragraph) -> list[str]:
+            relationship_ids: list[str] = []
+            for node in paragraph._p.iter():
+                if node.tag.endswith("}blip"):
+                    embed = node.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed")
+                    if embed:
+                        relationship_ids.append(embed)
+            return relationship_ids
+
+        def append_docx_image(relationship_id: str) -> None:
+            nonlocal order
+            rel = document.part.rels[relationship_id]
+            image_data = rel.target_part.blob
+            item = {
+                "relacion": relationship_id,
+                "tipo": rel.target_part.content_type,
+                "tamaño": len(image_data),
+                "hash": sha256(image_data).hexdigest(),
+                "contenido": image_data,
+            }
+            images.append(item)
+            elements.append(DocumentElement("imagen", order, item))
+            order += 1
+
         for block in iter_blocks(document):
             if isinstance(block, Paragraph):
                 text = block.text or ""
-                if not text.strip():
-                    continue
                 style = getattr(block.style, "name", "") if block.style else ""
-                kind = "titulo" if style and (style.lower().startswith("heading") or style.lower().startswith("título")) else "parrafo"
-                item = {"texto": text, "estilo": style or None}
-                text_blocks.append(item)
-                elements.append(DocumentElement(kind, order, item))
-                order += 1
+                if text.strip():
+                    kind = "titulo" if style and (
+                        style.lower().startswith("heading") or style.lower().startswith("título")
+                    ) else "parrafo"
+                    item = {"texto": text, "estilo": style or None}
+                    text_blocks.append(item)
+                    elements.append(DocumentElement(kind, order, item))
+                    order += 1
+                for relationship_id in paragraph_image_relationships(block):
+                    append_docx_image(relationship_id)
             elif isinstance(block, Table):
                 rows = [[cell.text for cell in row.cells] for row in block.rows]
-                item = {"filas": rows, "filas_count": len(rows), "columnas_count": max((len(r) for r in rows), default=0)}
+                item = {
+                    "filas": rows,
+                    "filas_count": len(rows),
+                    "columnas_count": max((len(r) for r in rows), default=0),
+                }
                 tables.append(item)
                 elements.append(DocumentElement("tabla", order, item))
                 order += 1
 
-        for index, shape in enumerate(document.inline_shapes):
-            image = self._docx_image_info(document, shape)
-            image["orden_imagen"] = index
-            images.append(image)
-            elements.append(DocumentElement("imagen", order, image))
-            order += 1
-
         return DocumentModel(
             identificacion=identification,
             metadatos=metadata,
-            estructura={"secciones": len(document.sections), "orden": [e.orden for e in elements]},
+            estructura={
+                "secciones": len(document.sections),
+                "orden": [e.orden for e in elements],
+            },
             texto=text_blocks,
             tablas=tables,
             imagenes=images,
@@ -271,37 +299,28 @@ class DocumentExtractor:
         )
 
     @staticmethod
-    def _docx_image_info(document: Any, shape: Any) -> dict[str, Any]:
-        embed = shape._inline.graphic.graphicData.pic.blipFill.blip.embed
-        rel = document.part.rels[embed]
-        data = rel.target_part.blob
-        return {
-            "relacion": embed,
-            "tipo": rel.target_part.content_type,
-            "tamaño": len(data),
-            "hash": sha256(data).hexdigest(),
-            "contenido": data,
-        }
-
-    @staticmethod
     def _pdf_metadata(metadata: Any) -> dict[str, Any]:
         if not metadata:
             return {}
-        result: dict[str, Any] = {}
-        for key, value in metadata.items():
-            clean_key = str(key).lstrip("/")
-            result[clean_key] = value
-        return result
+        return {str(key).lstrip("/"): value for key, value in metadata.items()}
 
     @staticmethod
     def _extract_image(data: bytes, identification: dict[str, Any]) -> DocumentModel:
         metadata: dict[str, Any] = {}
         try:
-            from PIL import Image
             from io import BytesIO
+            from PIL import Image
+
             with Image.open(BytesIO(data)) as image:
-                metadata.update({"formato": image.format, "ancho": image.width, "alto": image.height, "modo": image.mode})
-                metadata["metadatos_exif"] = dict(image.getexif())
+                metadata.update(
+                    {
+                        "formato": image.format,
+                        "ancho": image.width,
+                        "alto": image.height,
+                        "modo": image.mode,
+                        "metadatos_exif": dict(image.getexif()),
+                    }
+                )
         except ImportError:
             metadata["advertencia"] = "Pillow no está instalada; no se extrajeron dimensiones/EXIF."
         except Exception as exc:
