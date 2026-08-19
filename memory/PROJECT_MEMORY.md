@@ -106,7 +106,8 @@ apps/
 Componentes principales:
 
 core:
-    entidades generales de la finca.
+    entidades generales de la finca, contexto de tenant,
+    membresías y autorización por finca.
 
 ganado:
     animales, movimientos, pesajes, salud,
@@ -136,6 +137,7 @@ Entidades principales:
 - DocumentoAnimal
 - ComposicionGenetica
 - ProcedenciaAnimal
+- UsuarioFinca
 
 ---
 
@@ -187,7 +189,8 @@ Se dispone de:
 - dashboard;
 - indicadores;
 - datos de prueba;
-- primeras implementaciones del motor de métricas.
+- primeras implementaciones del motor de métricas;
+- aislamiento Multi-Finca V1 y control de acceso por membresía.
 
 El motor de métricas se encuentra en evolución.
 
@@ -405,3 +408,137 @@ rigurosa para evaluar IAs sobre el repositorio.
 Próxima etapa:
 recuperar el estado real del Engine y del HTML temporal de pruebas,
 y construir GMD utilizando primero las funciones existentes.
+
+---
+
+## 17. MULTI-FINCA Y CONTROL DE ACCESO — HATO V1
+
+Fecha: 2026-08-19
+Estado: IMPLEMENTADO, PROBADO Y VERIFICADO
+
+Se implementó el aislamiento de tenant y control de acceso por finca.
+La Finca se mantiene como la unidad empresarial/productiva soberana y
+no se introduce una entidad `Empresa` artificial.
+
+### 17.1 Modelo de autorización
+
+Se creó `UsuarioFinca`, que representa la membresía de un usuario en una
+finca concreta y constituye el límite de autorización de Hato V1.
+
+Roles definidos:
+
+- propietario
+- administrador
+- operador
+- veterinario
+- auditor
+
+La membresía contiene `activa`, permitiendo revocar acceso sin eliminar
+el historial.
+
+Existe una restricción única por pareja `usuario + finca` y dos índices
+compuestos para consultas por usuario/estado y finca/estado.
+
+### 17.2 Contexto de tenant
+
+Se creó `apps/core/tenant.py` como módulo desacoplado para:
+
+- obtener las fincas autorizadas de un usuario;
+- verificar acceso a una finca concreta;
+- obtener el rol del usuario dentro de una finca;
+- resolver la finca activa desde la sesión;
+- cambiar la finca activa mediante validación estricta.
+
+La finca activa se conserva en `request.session['finca_activa_id']`.
+El sistema ya no depende de parámetros inseguros como `?finca=102` para
+resolver el ámbito operativo.
+
+Los usuarios normales solo pueden seleccionar fincas con membresía activa.
+La revocación de `activa` bloquea el acceso en la siguiente petición.
+
+### 17.3 Root / Superusuario
+
+`is_superuser=True` conserva alcance global sobre las fincas activas,
+sin requerir una membresía `UsuarioFinca`.
+
+Root puede operar globalmente y, cuando necesita un contexto concreto,
+fijar una finca activa en sesión para trabajar o auditar mapas, potreros,
+animales e indicadores dentro de ese ámbito.
+
+### 17.4 Integración en vistas
+
+Se protegieron las vistas sensibles mediante `verificar_acceso_finca`.
+
+En `apps/core/views.py`:
+
+- `seleccionar_finca` funciona exclusivamente mediante POST;
+- `mapa_finca` valida autorización antes de entregar datos geográficos;
+- `animales_por_potrero` valida autorización antes de consultar animales.
+
+Las vistas administrativas y de producción resuelven el contexto desde
+la finca activa y el conjunto de fincas autorizadas del usuario, evitando
+el bypass mediante parámetros GET.
+
+### 17.5 Migración de datos existente
+
+`0006_usuariofinca.py` crea el esquema de membresías.
+
+`0007_migrar_membresias_iniciales.py` realiza una migración de datos no
+destructiva: para cada finca con `created_by`, crea o recupera una
+membresía con rol `propietario` y `activa=True`.
+
+No se inventan usuarios ni se eliminan fincas existentes. Las fincas sin
+`created_by` quedan disponibles para asignación posterior por Root.
+
+### 17.6 Seguridad verificada
+
+Se creó `apps/core/test_security_tenant.py` con 10 pruebas automatizadas
+que cubren:
+
+1. aislamiento Finca A → Finca B;
+2. protección contra manipulación de `?finca=`;
+3. rechazo de selección POST no autorizada;
+4. bloqueo por membresía inactiva;
+5. usuario con múltiples fincas;
+6. cambio de rol según finca;
+7. acceso global de Root;
+8. modo global de Root;
+9. contexto operativo de Root;
+10. preservación de autoría y membresía inicial.
+
+Resultado reproducible reportado:
+`python3 -m unittest apps.core.test_security_tenant -v`
+→ **10/10 tests PASSED**.
+
+### 17.7 Verificación global reportada
+
+Al cierre de esta etapa se reportó:
+
+- Seguridad Tenant: 10/10 PASSED;
+- Motor de Métricas V1: 13/13 PASSED;
+- Herramientas y Continuidad: 38/38 PASSED;
+- Total global: **61/61 tests PASSED**;
+- `integrity_check.py`: **PASS**.
+
+Este resultado queda registrado como evidencia reportada del estado del
+repositorio al 2026-08-19.
+
+### 17.8 Decisiones derivadas
+
+- La Finca es el tenant soberano de Hato V1.
+- La autorización se modela explícitamente mediante `UsuarioFinca`.
+- La selección de finca operativa ocurre mediante sesión y POST validado.
+- La seguridad debe verificarse contra membresías activas en servidor.
+- Root mantiene alcance global, con capacidad de fijar un contexto de finca.
+- Los catálogos `Especie`, `Raza` y `TipoPasto` permanecen globales y no
+  reciben `finca_id` en esta etapa.
+- Se prioriza la separación entre identidad (`User`), autorización
+  (`UsuarioFinca`) y ámbito de datos (`Finca`).
+
+### 17.9 Estado de la etapa
+
+**CERRADA:** Multi-Finca + Control de Acceso Hato V1.
+
+El siguiente trabajo debe partir de este estado y no reconstruir el modelo
+de tenant desde cero. Cualquier modificación futura de seguridad deberá
+preservar las pruebas de aislamiento y la evidencia reproducible.
