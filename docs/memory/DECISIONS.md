@@ -24,3 +24,10 @@
 **Decisión:** construir primero una memoria fundacional y un consolidador fiable; después automatizar el commit diario.
 
 **Motivo:** la automatización debe preservar conocimiento correctamente antes de ejecutarse sin supervisión.
+
+## D-006 — Finca como unidad productiva independiente
+**Decisión:** en el vocabulario conceptual de Hato, `Finca` representa una unidad productiva ganadera independiente. No se adopta por defecto una jerarquía `Empresa → múltiples Fincas`.
+
+**Motivo:** preservar el concepto original del sistema: una finca constituye por sí misma una explotación con sus animales, potreros, corrales, instalaciones, producción y operación. Cualquier modelo futuro de multiempresa deberá definirse explícitamente sin reinterpretar la finca como una simple sucursal.
+
+**Referencia:** `docs/TERMINOLOGY.md`, versión 1.0.
