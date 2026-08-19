@@ -55,6 +55,12 @@ Para PDF se evaluará extracción de texto, páginas, metadatos, imágenes, tabl
 
 Para DOCX se evaluará extracción de párrafos, títulos, tablas, imágenes, orden y metadatos disponibles.
 
+**Implementación V1:** `tools/document_extractor.py` contiene el contrato `DocumentModel`, los elementos ordenados `DocumentElement`, identificación mediante tamaño/hash y extractores para PDF, DOCX e imágenes. PDF usa `pypdf` y tablas mediante `pdfplumber` cuando está disponible; DOCX usa `python-docx`; imágenes usan Pillow para dimensiones/EXIF cuando está disponible. Las dependencias específicas se cargan de forma opcional y los errores de extracción se representan mediante excepciones controladas.
+
+**Pruebas iniciales:** `tools/test_document_extractor.py` verifica detección por firma, identificación/hash de imagen y manejo controlado de formatos no soportados.
+
+**Resultado:** extractor documental independiente implementado. Las pruebas de contenido real PDF/DOCX quedan para 4.4 y 4.5, respectivamente.
+
 ### 4.4 — Prueba PDF universal
 
 Crear un PDF controlado con título, texto, tabla e imagen y verificar qué componentes puede extraer el sistema.
@@ -117,6 +123,8 @@ La fase se considerará cerrada cuando exista evidencia de que los formatos defi
 
 ## Estado
 
-- Fase 4: planificada.
-- Subfase 4.1: especificación inicial documentada.
-- Próximo paso: ejecutar/verificar 4.1 contra el repositorio y las capacidades reales disponibles antes de diseñar 4.2.
+- Fase 4: en ejecución.
+- Subfase 4.1: especificación inicial documentada y tareas iniciales ejecutadas.
+- Subfase 4.2: contrato/modelo documental definido.
+- Subfase 4.3: extractor documental V1 implementado y pruebas iniciales añadidas.
+- Próximo paso: ejecutar 4.4 con un PDF universal controlado.
