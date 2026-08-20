@@ -20,9 +20,9 @@ class MotorMetricasHibridoTests(TestCase):
             finca=self.finca,
         )
 
-        self.assertTrue(resultado.exito)
+        self.assertTrue(resultado.es_valido)
         self.assertEqual(resultado.valor, 2)
-        self.assertEqual(resultado.codigo, "CARGA_ANIMAL_HA")
+        self.assertEqual(resultado.metrica, "CARGA_ANIMAL_HA")
 
     def test_ejecuta_metrica_creada_en_bd(self):
         metrica = Metrica.objects.create(
@@ -53,9 +53,9 @@ class MotorMetricasHibridoTests(TestCase):
             finca=self.finca,
         )
 
-        self.assertTrue(resultado.exito)
+        self.assertTrue(resultado.es_valido)
         self.assertEqual(resultado.valor, 25)
-        self.assertEqual(resultado.codigo, "M05_CONFIG")
+        self.assertEqual(resultado.metrica, "M05_CONFIG")
 
     def test_metrica_bd_tiene_precedencia_sobre_catalogo(self):
         Metrica.objects.create(
@@ -73,8 +73,9 @@ class MotorMetricasHibridoTests(TestCase):
             finca=self.finca,
         )
 
-        self.assertTrue(resultado.exito)
+        self.assertTrue(resultado.es_valido)
         self.assertEqual(resultado.valor, 14)
+        self.assertEqual(resultado.metrica, "CANT_ANIMALES_TOTAL")
 
     def test_falla_si_no_existe_en_bd_ni_catalogo(self):
         with self.assertRaises(MetricaNoEncontrada):
