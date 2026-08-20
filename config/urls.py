@@ -2,37 +2,35 @@
 
 from django.contrib import admin
 from django.urls import include, path
-from apps.core import views
+from apps.core import views as core_views
+from apps.administrador import views as admin_views
 
 
 urlpatterns = [
+    # HOME / PORTAL PRINCIPAL DEL SISTEMA
+    path("", admin_views.dashboard, name="home"),
+
+    # ADMINISTRACIÓN DJANGO
     path("admin/", admin.site.urls),
 
+    # CONTROL MULTI-FINCA
     path(
         "finca/seleccionar/",
-        views.seleccionar_finca,
+        core_views.seleccionar_finca,
         name="seleccionar_finca",
     ),
-
     path(
         "finca/<int:finca_id>/mapa/",
-        views.mapa_finca,
+        core_views.mapa_finca,
         name="mapa_finca",
     ),
-
     path(
         "ganado/animales/potrero/<int:potrero_id>/",
-        views.animales_por_potrero,
+        core_views.animales_por_potrero,
         name="animales_por_potrero",
     ),
 
-    path(
-        "administrador/",
-        include("apps.administrador.urls"),
-    ),
-
-    path(
-        "produccion/",
-        include("apps.produccion.urls"),
-    ),
+    # MÓDULOS DE APLICACIONES
+    path("administrador/", include("apps.administrador.urls")),
+    path("produccion/", include("apps.produccion.urls")),
 ]
