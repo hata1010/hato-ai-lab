@@ -1,57 +1,48 @@
 {% load static %}
 
 <!DOCTYPE html>
-
 <html lang="es">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
         {% block title %}
         Gestión Ganadera
         {% endblock %}
     </title>
-
-    <link
-        rel="stylesheet"
-        href="{% static 'administrador/css/dashboard.css' %}"
-    >
-
+    <link rel="stylesheet" href="{% static 'administrador/css/dashboard.css' %}">
 </head>
 
-
 <body>
-
-
 <header class="topbar">
-
     <div class="brand">
         🐄 Gestión Ganadera
     </div>
-
     <div class="user-area">
-        Administrador
+        {% if user.is_authenticated %}
+            <span>{{ user.username }}</span>
+            {% if user.is_superuser %}
+                <span class="badge" style="background:#10b981;color:white;padding:2px 6px;border-radius:4px;font-size:0.75rem;margin-left:5px;">ROOT</span>
+            {% endif %}
+        {% else %}
+            <span>Hato AI Lab</span>
+        {% endif %}
     </div>
-
 </header>
 
-
 <div class="layout">
-
-
     <aside class="sidebar">
-
         <nav>
-
             <a href="{% url 'administrador:dashboard' %}">
                 🏠 Dashboard
+            </a>
+
+            <a href="{% url 'produccion:lista_metricas' %}">
+                📊 Definición de Métricas
+            </a>
+
+            <a href="{% url 'produccion:indicadores' %}">
+                📈 Indicadores
             </a>
 
             <a href="#">
@@ -73,28 +64,15 @@
             <a href="#">
                 🗺️ Mapa
             </a>
-
         </nav>
-
     </aside>
 
-
     <main class="content">
-
         {% block content %}
         {% endblock %}
-
     </main>
-
-
 </div>
 
-
-<script
-    src="{% static 'administrador/js/dashboard.js' %}">
-</script>
-
-
+<script src="{% static 'administrador/js/dashboard.js' %}"></script>
 </body>
-
 </html>
