@@ -1,15 +1,29 @@
-from django.shortcuts import render
-from apps.core.models import Finca
+from django.shortcuts import render, get_object_or_404, redirect
+from django.core.exceptions import PermissionDenied
+from django.views.decorators.http import require_POST
+from django.db.models import Q
+
 from apps.ganado.models import Animal
+from apps.core.models import Potrero
 from apps.core.tenant import (
     obtener_finca_activa,
     obtener_fincas_usuario,
+    verificar_acceso_finca,
 )
-from apps.produccion.services.indicadores import (
-    obtener_indicadores_finca,
-)
+from apps.produccion.models import Metrica
+from apps.produccion.forms import MetricaForm
+from apps.produccion.services.indicadores import obtener_indicadores_finca
 from apps.produccion.engine.plan import PlanMetrica
+from apps.produccion.engine import (
+    EjecutorMotorV1,
+    obtener_metrica_v1,
+    METRICAS_V1,
+)
 
+
+# ============================================================
+# DASHBOARD E INDICADORES
+# ============================================================
 
 def dashboard(request):
     finca = obtener_finca_activa(request)
@@ -19,11 +33,7 @@ def dashboard(request):
         "fincas_disponibles": obtener_fincas_usuario(request.user),
     }
 
-    return render(
-        request,
-        "administrador/dashboard.html",
-        contexto,
-    )
+    return render(request, "administrador/dashboard.html", contexto)
 
 
 def indicadores(request):
@@ -39,12 +49,164 @@ def indicadores(request):
         "indicadores": indicadores_list,
     }
 
-    return render(
-        request,
-        "administrador/indicadores.html",
-        contexto,
-    )
+    return render(request, "administrador/indicadores.html", contexto)
 
+
+# ============================================================
+# PÁGINA DE DEFINICIÓN Y ADMINISTRACIÓN DE MÉTRICAS (V1)
+# ============================================================
+
+def lista_metricas(request):
+    """Lista métricas globales y de la finca activa autorizada."""
+    finca = obtener_finca_activa(request)
+    fincas_disponibles = obtener_fincas_usuario(request.user)
+
+    if finca:
+        metricas = Metrica.objects.filter(
+            Q(finca=finca) | Q(finca__isnull=True)
+        )
+    else:
+        metricas = Metrica.objects.filter(finca__isnull=True)
+
+    contexto = {
+        "finca": finca,
+        "fincas_disponibles": fincas_disponibles,
+        "metricas": metricas.order_by("-finca_id", "categoria", "nombre"),
+        "catalogo_v1": METRICAS_V1,
+    }
+    return render(request, "produccion/metricas_lista.html", contexto)
+
+
+def crear_editar_metrica(request, metrica_id=None):
+    """Crea o edita una definición local, con protección Multi-Finca."""
+    finca = obtener_finca_activa(request)
+    fincas_disponibles = obtener_fincas_usuario(request.user)
+
+    instancia = None
+    if metrica_id:
+        instancia = get_object_or_404(Metrica, id=metrica_id)
+        if instancia.finca and not verificar_acceso_finca(request.user, instancia.finca):
+            raise PermissionDenied("No tienes autorización para editar métricas de esta finca.")
+        if instancia.finca is None and not getattr(request.user, "is_superuser", False):
+            raise PermissionDenied("Solo el superusuario puede editar métricas globales del sistema.")
+
+    if request.method == "POST":
+        form = MetricaForm(request.POST, instance=instancia)
+        if form.is_valid():
+            metrica = form.save(commit=False)
+            if not instancia:
+                if finca:
+                    metrica.finca = finca
+                elif not getattr(request.user, "is_superuser", False):
+                    raise PermissionDenied("No hay una finca activa autorizada para crear la métrica.")
+            metrica.save()
+            return redirect("produccion:lista_metricas")
+    else:
+        form = MetricaForm(instance=instancia)
+
+    contexto = {
+        "form": form,
+        "metrica": instancia,
+        "finca": finca,
+        "fincas_disponibles": fincas_disponibles,
+        "es_edicion": instancia is not None,
+    }
+    return render(request, "produccion/metrica_form_y_prueba.html", contexto)
+
+
+def probar_metrica(request, metrica_id):
+    """Ejecuta exclusivamente EjecutorMotorV1 sobre la finca activa."""
+    finca = obtener_finca_activa(request)
+    fincas_disponibles = obtener_fincas_usuario(request.user)
+
+    metrica_db = get_object_or_404(Metrica, id=metrica_id)
+    if metrica_db.finca and not verificar_acceso_finca(request.user, metrica_db.finca):
+        raise PermissionDenied("No tienes autorización para probar métricas de esta finca.")
+
+    sexo = request.GET.get("sexo", "")
+    contexto_eval = {}
+    if sexo in ("H", "M"):
+        contexto_eval["sexo"] = sexo
+
+    codigo_catalogo = metrica_db.codigo
+    try:
+        def_v1 = obtener_metrica_v1(codigo_catalogo)
+    except ValueError:
+        def_v1 = None
+
+    resultado = None
+    error = None
+
+    if def_v1 and finca:
+        ejecutor = EjecutorMotorV1()
+
+        if def_v1.familia in ("poblacion", "peso"):
+            datos_fuente = Animal.objects.filter(finca=finca)
+            if sexo in ("H", "M"):
+                datos_fuente = datos_fuente.filter(sexo=sexo)
+        elif def_v1.familia == "territorial":
+            datos_fuente = [
+                p.area_hectareas
+                for p in Potrero.objects.filter(finca=finca, is_active=True)
+                if p.area_hectareas
+            ]
+        elif def_v1.familia == "crecimiento":
+            datos_fuente = (
+                Animal.objects
+                .filter(finca=finca, pesajes__isnull=False)
+                .distinct()
+                .first()
+            )
+        elif def_v1.familia == "capacidad_carga":
+            total_anim = Animal.objects.filter(finca=finca, estado="activo").count()
+            total_ha = sum(
+                p.area_hectareas
+                for p in Potrero.objects.filter(finca=finca, is_active=True)
+                if p.area_hectareas
+            )
+            datos_fuente = {"animales": total_anim, "hectareas": total_ha}
+        else:
+            datos_fuente = Animal.objects.filter(finca=finca)
+
+        try:
+            resultado = ejecutor.ejecutar(def_v1, datos_fuente, contexto=contexto_eval)
+        except Exception as exc:
+            error = str(exc)
+    else:
+        error = (
+            f"El código '{codigo_catalogo}' no tiene una implementación asociada "
+            "en el catálogo V1 o no hay finca activa."
+        )
+
+    contexto = {
+        "finca": finca,
+        "fincas_disponibles": fincas_disponibles,
+        "metrica": metrica_db,
+        "definicion_v1": def_v1,
+        "sexo": sexo,
+        "resultado": resultado,
+        "error": error,
+    }
+    return render(request, "produccion/metrica_form_y_prueba.html", contexto)
+
+
+@require_POST
+def toggle_metrica_activa(request, metrica_id):
+    """Activa o desactiva una métrica con validación de tenant."""
+    metrica = get_object_or_404(Metrica, id=metrica_id)
+    if metrica.finca and not verificar_acceso_finca(request.user, metrica.finca):
+        raise PermissionDenied("No tienes autorización para modificar esta métrica.")
+    if metrica.finca is None and not getattr(request.user, "is_superuser", False):
+        raise PermissionDenied("Solo el superusuario puede modificar métricas globales.")
+
+    metrica.activa = not metrica.activa
+    metrica.save()
+    return redirect(request.META.get("HTTP_REFERER") or "produccion:lista_metricas")
+
+
+# ============================================================
+# VISTA HISTÓRICA PRUEBA MOTOR (CONSERVADA PARA COMPATIBILIDAD)
+# ============================================================
 
 def prueba_motor(request):
     finca = obtener_finca_activa(request)
@@ -58,62 +220,43 @@ def prueba_motor(request):
         animales = Animal.objects.filter(finca=finca)
 
     pasos = []
-
     if sexo in ("H", "M"):
-        pasos.append(
-            {
-                "funcion": "FILTRO",
-                "parametros": {
-                    "campo": "sexo",
-                    "valor": sexo,
-                },
-            }
-        )
+        pasos.append({
+            "funcion": "FILTRO",
+            "parametros": {"campo": "sexo", "valor": sexo},
+        })
 
     nombre_metrica = ""
     unidad = ""
 
     if metrica == "peso_promedio":
-        pasos.extend(
-            [
-                {"funcion": "MAPEAR", "parametros": {"funcion": "PESO_ACTUAL"}},
-                {"funcion": "PROMEDIO"},
-            ]
-        )
+        pasos.extend([
+            {"funcion": "MAPEAR", "parametros": {"funcion": "PESO_ACTUAL"}},
+            {"funcion": "PROMEDIO"},
+        ])
         nombre_metrica = "Peso promedio"
         unidad = "kg"
-
     elif metrica == "peso_total":
-        pasos.extend(
-            [
-                {"funcion": "MAPEAR", "parametros": {"funcion": "PESO_ACTUAL"}},
-                {"funcion": "SUMA"},
-            ]
-        )
+        pasos.extend([
+            {"funcion": "MAPEAR", "parametros": {"funcion": "PESO_ACTUAL"}},
+            {"funcion": "SUMA"},
+        ])
         nombre_metrica = "Peso total"
         unidad = "kg"
-
     elif metrica == "cantidad":
         pasos.append({"funcion": "CONTEO"})
         nombre_metrica = "Cantidad de animales"
         unidad = "animales"
-
     else:
         metrica = "peso_promedio"
-        pasos.extend(
-            [
-                {"funcion": "MAPEAR", "parametros": {"funcion": "PESO_ACTUAL"}},
-                {"funcion": "PROMEDIO"},
-            ]
-        )
+        pasos.extend([
+            {"funcion": "MAPEAR", "parametros": {"funcion": "PESO_ACTUAL"}},
+            {"funcion": "PROMEDIO"},
+        ])
         nombre_metrica = "Peso promedio"
         unidad = "kg"
 
-    plan = PlanMetrica(
-        nombre=nombre_metrica,
-        pasos=pasos,
-    )
-
+    plan = PlanMetrica(nombre=nombre_metrica, pasos=pasos)
     validacion = plan.validar()
     resultado = None
     error = None
@@ -125,12 +268,7 @@ def prueba_motor(request):
             error = str(exc)
 
     explicacion = plan.explicar()
-
-    nombres_sexo = {
-        "": "Todos",
-        "H": "Hembras",
-        "M": "Machos",
-    }
+    nombres_sexo = {"": "Todos", "H": "Hembras", "M": "Machos"}
     sexo_nombre = nombres_sexo.get(sexo, "Todos")
 
     contexto = {
@@ -148,8 +286,4 @@ def prueba_motor(request):
         "animales_count": animales.count(),
     }
 
-    return render(
-        request,
-        "produccion/prueba_motor.html",
-        contexto,
-    )
+    return render(request, "produccion/prueba_motor.html", contexto)
