@@ -5,7 +5,7 @@ import hashlib
 import unittest
 import zipfile
 
-from document_extractor import DocumentExtractor, UnsupportedDocumentError
+from tools.document_extractor import DocumentExtractor, UnsupportedDocumentError
 
 
 class DocumentExtractorTests(unittest.TestCase):

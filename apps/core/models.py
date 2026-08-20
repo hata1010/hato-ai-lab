@@ -237,3 +237,86 @@ class Potrero(models.Model):
 
     def __str__(self):
         return f"{self.finca.nombre} - {self.nombre}"
+
+
+class UsuarioFinca(models.Model):
+    """
+    Membresía y control de acceso de un usuario a una finca específica.
+    Constituye el límite de autorización del sistema Hato V1.
+    """
+
+
+    ROLES_CHOICES = [
+        ("propietario", "Propietario"),
+        ("administrador", "Administrador"),
+        ("operador", "Operador"),
+        ("veterinario", "Veterinario"),
+        ("auditor", "Auditor"),
+    ]
+
+
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="membresias_finca",
+        verbose_name="Usuario",
+    )
+
+
+    finca = models.ForeignKey(
+        Finca,
+        on_delete=models.CASCADE,
+        related_name="usuarios_autorizados",
+        verbose_name="Finca",
+    )
+
+
+    rol = models.CharField(
+        max_length=30,
+        choices=ROLES_CHOICES,
+        default="operador",
+        verbose_name="Rol en la finca",
+    )
+
+
+    activa = models.BooleanField(
+        default=True,
+        verbose_name="Membresía activa",
+        help_text="Permite revocar el acceso a una finca sin borrar el historial.",
+    )
+
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+
+    class Meta:
+        ordering = ["finca", "usuario"]
+        verbose_name = "Membresía de Finca"
+        verbose_name_plural = "Membresías de Fincas"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["usuario", "finca"],
+                name="usuario_finca_unico",
+            )
+        ]
+        indexes = [
+            models.Index(
+                fields=["usuario", "activa"],
+                name="core_uf_user_act_idx",
+            ),
+            models.Index(
+                fields=["finca", "activa"],
+                name="core_uf_finca_act_idx",
+            ),
+        ]
+
+
+    def __str__(self):
+        return f"{self.usuario.username} → {self.finca.nombre} ({self.get_rol_display()})"

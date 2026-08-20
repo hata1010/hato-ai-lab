@@ -9,6 +9,12 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 
     path(
+        "finca/seleccionar/",
+        views.seleccionar_finca,
+        name="seleccionar_finca",
+    ),
+
+    path(
         "finca/<int:finca_id>/mapa/",
         views.mapa_finca,
         name="mapa_finca",
