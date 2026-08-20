@@ -3,21 +3,24 @@
 # ============================================================
 # HATO AI LAB — ACTUALIZAR DESDE GITHUB
 # ============================================================
-# Uso:
+# Uso normal:
 #   ./tools/actualizar_desde_github.sh
-#       Actualiza la rama actualmente activa.
 #
-#   ./tools/actualizar_desde_github.sh <rama>
-#       Cambia a la rama indicada, la actualiza y la deja activa.
+# El script trabaja sin parámetros:
+#   • Si estás en main, actualiza main.
+#   • Si estás en otra rama, actualiza esa rama.
+#   • Si existen ramas remotas diferentes, permite seleccionar
+#     una de ellas mediante un menú, sin escribir nombres de rama.
+#   • Nunca cambia de rama silenciosamente.
 # ============================================================
 
 set -e
 
 REPO_PATH="$(git rev-parse --show-toplevel)"
-CURRENT_BRANCH="$(git branch --show-current)"
-TARGET_BRANCH="${1:-$CURRENT_BRANCH}"
-
 cd "$REPO_PATH"
+CURRENT_BRANCH="$(git branch --show-current)"
+
+clear 2>/dev/null || true
 
 echo
 echo "============================================================"
@@ -30,23 +33,13 @@ echo
 echo "🌿 Rama actual:"
 echo "   ${CURRENT_BRANCH:-'(sin rama)'}"
 echo
-echo "🎯 Rama solicitada:"
-echo "   $TARGET_BRANCH"
-echo
-
-# ------------------------------------------------------------
-# Verificar que Git tenga una rama activa
-# ------------------------------------------------------------
 
 if [ -z "$CURRENT_BRANCH" ]; then
     echo "❌ Error: el repositorio no tiene una rama activa."
     exit 1
 fi
 
-# ------------------------------------------------------------
-# Verificar cambios locales ANTES de cambiar de rama
-# ------------------------------------------------------------
-
+# No continuar si hay trabajo local sin guardar.
 if [ -n "$(git status --porcelain)" ]; then
     echo "⚠️ TIENES CAMBIOS LOCALES."
     echo
@@ -57,43 +50,70 @@ if [ -n "$(git status --porcelain)" ]; then
     exit 2
 fi
 
-# ------------------------------------------------------------
-# Obtener información de GitHub
-# ------------------------------------------------------------
-
 echo "📡 Consultando GitHub..."
 git fetch origin
 
 # ------------------------------------------------------------
-# Verificar que la rama solicitada exista en GitHub
+# Selección de rama SIN parámetros
 # ------------------------------------------------------------
+TARGET_BRANCH="$CURRENT_BRANCH"
 
-if ! git show-ref --verify --quiet "refs/remotes/origin/$TARGET_BRANCH"; then
-    echo
-    echo "❌ Error: la rama '$TARGET_BRANCH' no existe en origin."
-    echo
-    echo "🌿 Ramas disponibles en GitHub:"
-    git for-each-ref --format='   %(refname:strip=3)' refs/remotes/origin/ | sort
-    exit 3
+# Si estamos en main, main es la opción normal.
+# Si estamos en una rama de trabajo, preguntamos solo cuando
+# haya otras ramas remotas disponibles.
+mapfile -t REMOTE_BRANCHES < <(
+    git for-each-ref --format='%(refname:strip=3)' refs/remotes/origin/ \
+    | grep -v '^HEAD$' \
+    | sort
+)
+
+if [ "$CURRENT_BRANCH" != "main" ]; then
+    CANDIDATES=()
+    for BRANCH in "${REMOTE_BRANCHES[@]}"; do
+        [ "$BRANCH" = "$CURRENT_BRANCH" ] && continue
+        CANDIDATES+=("$BRANCH")
+    done
+
+    if [ "${#CANDIDATES[@]}" -gt 0 ]; then
+        echo "🌿 Estás en una rama de trabajo."
+        echo
+        echo "Selecciona qué rama quieres dejar activa:"
+        echo
+        echo "   0) Mantener $CURRENT_BRANCH"
+        for i in "${!CANDIDATES[@]}"; do
+            printf "   %d) %s\n" "$((i + 1))" "${CANDIDATES[$i]}"
+        done
+        echo
+        read -r -p "👉 Opción [0]: " OPTION
+        OPTION="${OPTION:-0}"
+
+        if ! [[ "$OPTION" =~ ^[0-9]+$ ]] || [ "$OPTION" -gt "${#CANDIDATES[@]}" ]; then
+            echo "❌ Opción inválida."
+            exit 3
+        fi
+
+        if [ "$OPTION" -gt 0 ]; then
+            TARGET_BRANCH="${CANDIDATES[$((OPTION - 1))]}"
+        fi
+    fi
 fi
 
-# ------------------------------------------------------------
-# Cambiar a la rama solicitada si es necesario
-# ------------------------------------------------------------
+echo
+echo "🎯 Rama seleccionada:"
+echo "   $TARGET_BRANCH"
+echo
 
+# ------------------------------------------------------------
+# Activar la rama seleccionada
+# ------------------------------------------------------------
 if [ "$CURRENT_BRANCH" != "$TARGET_BRANCH" ]; then
     echo "🔀 Cambiando de rama: $CURRENT_BRANCH → $TARGET_BRANCH"
-
     if git show-ref --verify --quiet "refs/heads/$TARGET_BRANCH"; then
         git switch "$TARGET_BRANCH"
     else
         git switch --track -c "$TARGET_BRANCH" "origin/$TARGET_BRANCH"
     fi
 fi
-
-# ------------------------------------------------------------
-# Verificar estado después del cambio
-# ------------------------------------------------------------
 
 ACTIVE_BRANCH="$(git branch --show-current)"
 if [ "$ACTIVE_BRANCH" != "$TARGET_BRANCH" ]; then
@@ -103,10 +123,6 @@ fi
 
 LOCAL="$(git rev-parse "$TARGET_BRANCH")"
 REMOTE="$(git rev-parse "origin/$TARGET_BRANCH")"
-
-# ------------------------------------------------------------
-# Ya actualizado
-# ------------------------------------------------------------
 
 if [ "$LOCAL" = "$REMOTE" ]; then
     echo
@@ -123,43 +139,24 @@ echo "📌 Commit:"
     exit 0
 fi
 
-# ------------------------------------------------------------
-# Determinar diferencia
-# ------------------------------------------------------------
-
 AHEAD=$(git rev-list --count "origin/$TARGET_BRANCH..$TARGET_BRANCH")
 BEHIND=$(git rev-list --count "$TARGET_BRANCH..origin/$TARGET_BRANCH")
 
-echo
 echo "📊 Estado:"
 echo "   Commits locales que GitHub no tiene: $AHEAD"
 echo "   Commits de GitHub que local no tiene: $BEHIND"
 echo
 
-# ------------------------------------------------------------
-# Hay cambios locales publicados/no sincronizados
-# ------------------------------------------------------------
-
 if [ "$AHEAD" -gt 0 ]; then
     echo "⚠️ Tu máquina tiene commits que todavía no están en GitHub."
-    echo
     echo "❌ No se realizará un pull automático para evitar sobrescribir trabajo."
-    echo "   Usa guardar_en_github.sh para publicarlos cuando corresponda."
     exit 5
 fi
-
-# ------------------------------------------------------------
-# GitHub tiene cambios
-# ------------------------------------------------------------
 
 if [ "$BEHIND" -gt 0 ]; then
     echo "⬇️ Descargando cambios desde GitHub..."
     git pull --rebase origin "$TARGET_BRANCH"
 fi
-
-# ------------------------------------------------------------
-# Confirmación final
-# ------------------------------------------------------------
 
 FINAL_BRANCH="$(git branch --show-current)"
 FINAL_COMMIT="$(git rev-parse HEAD)"
