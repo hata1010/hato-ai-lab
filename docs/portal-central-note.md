@@ -1,0 +1,1 @@
+Portal central preparado para integrar las rutas reales del sistema y evitar enlaces ficticios. La página raíz `/` debe actuar como punto de entrada de navegación, mientras que los módulos conservan sus rutas propias.
