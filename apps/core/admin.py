@@ -7,10 +7,6 @@ from apps.ganado.models import MovimientoAnimal
 from apps.core.tenant import obtener_fincas_usuario
 
 
-# ============================================================
-# UTILIDADES DE AUTORIZACIÓN
-# ============================================================
-
 def usuario_es_superusuario(request):
     """Determina si el usuario actual es superusuario."""
     return (
@@ -38,16 +34,10 @@ def usuario_puede_acceder_finca(request, finca):
     ).exists()
 
 
-# ============================================================
-# INLINE: POTREROS DENTRO DE LA FINCA
-# ============================================================
-
 class PotreroInline(admin.TabularInline):
 
     model = Potrero
-
     extra = 0
-
     can_delete = True
 
     fields = (
@@ -64,57 +54,31 @@ class PotreroInline(admin.TabularInline):
     )
 
     def has_add_permission(self, request, obj=None):
-        """
-        Permite agregar potreros únicamente si:
-
-        - el usuario es superusuario, o
-        - el usuario tiene acceso activo a la finca.
-        """
         if usuario_es_superusuario(request):
             return True
-
         if obj is None:
             return False
-
         return usuario_puede_acceder_finca(request, obj)
 
     def has_change_permission(self, request, obj=None):
-        """
-        Permite modificar potreros solamente dentro
-        de una finca autorizada.
-        """
         if usuario_es_superusuario(request):
             return True
-
         if obj is None:
             return True
-
         return usuario_puede_acceder_finca(request, obj)
 
     def has_delete_permission(self, request, obj=None):
-        """
-        Permite eliminar potreros solamente dentro
-        de una finca autorizada.
-        """
         if usuario_es_superusuario(request):
             return True
-
         if obj is None:
             return True
-
         return usuario_puede_acceder_finca(request, obj)
 
-
-# ============================================================
-# INLINE: ANIMALES ACTIVOS DENTRO DEL POTRERO
-# ============================================================
 
 class AnimalesEnPotreroInline(admin.TabularInline):
 
     model = MovimientoAnimal
-
     extra = 0
-
     can_delete = False
 
     readonly_fields = (
@@ -138,10 +102,6 @@ class AnimalesEnPotreroInline(admin.TabularInline):
     def has_delete_permission(self, request, obj=None):
         return False
 
-
-# ============================================================
-# ADMINISTRACIÓN DE FINCAS
-# ============================================================
 
 @admin.register(Finca)
 class FincaAdmin(GISModelAdmin):
@@ -173,28 +133,11 @@ class FincaAdmin(GISModelAdmin):
         'updated_at',
     )
 
-    # ========================================================
-    # Potreros administrados directamente desde la finca
-    # ========================================================
-
     inlines = [
         PotreroInline,
     ]
 
-    # ========================================================
-    # FILTRO PRINCIPAL DE FINCAS
-    # ========================================================
-
     def get_queryset(self, request):
-        """
-        Superusuario:
-            ve todas las fincas.
-
-        Usuario normal:
-            solamente ve las fincas que tenga asignadas
-            mediante UsuarioFinca y cuya membresía esté activa.
-        """
-
         queryset = super().get_queryset(request)
 
         if usuario_es_superusuario(request):
@@ -206,12 +149,7 @@ class FincaAdmin(GISModelAdmin):
             is_active=True,
         ).distinct()
 
-    # ========================================================
-    # PERMISOS DE VISUALIZACIÓN
-    # ========================================================
-
     def has_view_permission(self, request, obj=None):
-
         if not request.user.is_authenticated:
             return False
 
@@ -223,49 +161,25 @@ class FincaAdmin(GISModelAdmin):
 
         return usuario_puede_acceder_finca(request, obj)
 
-    # ========================================================
-    # PERMISOS DE MODIFICACIÓN
-    # ========================================================
-
     def has_change_permission(self, request, obj=None):
-       if usuario_es_superusuario(request):
-        return True
+        if not request.user.is_authenticated:
+            return False
+
+        if usuario_es_superusuario(request):
+            return True
 
         if obj is None:
             return True
 
         return usuario_puede_acceder_finca(request, obj)
 
-    # ========================================================
-    # CREACIÓN DE FINCAS
-    # ========================================================
-
     def has_add_permission(self, request):
-
-        """
-        Las fincas nuevas son creadas únicamente por
-        el superusuario.
-
-        Un usuario normal primero recibe una finca mediante
-        UsuarioFinca.
-        """
-
         return usuario_es_superusuario(request)
 
-    # ========================================================
-    # ELIMINACIÓN DE FINCAS
-    # ========================================================
-
     def has_delete_permission(self, request, obj=None):
-
         if usuario_es_superusuario(request):
             return True
-
         return False
-
-    # ========================================================
-    # FIELDSETS
-    # ========================================================
 
     fieldsets = (
         (
@@ -307,10 +221,6 @@ class FincaAdmin(GISModelAdmin):
     )
 
 
-# ============================================================
-# ADMINISTRACIÓN DE POTREROS
-# ============================================================
-
 @admin.register(Potrero)
 class PotreroAdmin(GISModelAdmin):
 
@@ -345,20 +255,11 @@ class PotreroAdmin(GISModelAdmin):
         'area_hectareas',
     )
 
-    # ========================================================
-    # Animales activos dentro del potrero
-    # ========================================================
-
     inlines = [
         AnimalesEnPotreroInline,
     ]
 
-    # ========================================================
-    # FILTRO DE POTREROS
-    # ========================================================
-
     def get_queryset(self, request):
-
         queryset = super().get_queryset(request)
 
         if usuario_es_superusuario(request):
@@ -370,12 +271,7 @@ class PotreroAdmin(GISModelAdmin):
             finca__is_active=True,
         ).distinct()
 
-    # ========================================================
-    # PERMISOS DE VISUALIZACIÓN
-    # ========================================================
-
     def has_view_permission(self, request, obj=None):
-
         if not request.user.is_authenticated:
             return False
 
@@ -387,15 +283,10 @@ class PotreroAdmin(GISModelAdmin):
 
         return usuario_puede_acceder_finca(
             request,
-            obj.finca, 
+            obj.finca,
         )
 
-    # ========================================================
-    # PERMISOS DE MODIFICACIÓN
-    # ========================================================
-
     def has_change_permission(self, request, obj=None):
-
         if usuario_es_superusuario(request):
             return True
 
@@ -407,23 +298,13 @@ class PotreroAdmin(GISModelAdmin):
             obj.finca,
         )
 
-    # ========================================================
-    # CREACIÓN
-    # ========================================================
-
     def has_add_permission(self, request):
-
         if usuario_es_superusuario(request):
             return True
 
         return obtener_fincas_usuario(request.user).exists()
 
-    # ========================================================
-    # ELIMINACIÓN
-    # ========================================================
-
     def has_delete_permission(self, request, obj=None):
-
         if usuario_es_superusuario(request):
             return True
 
@@ -434,10 +315,6 @@ class PotreroAdmin(GISModelAdmin):
             request,
             obj.finca,
         )
-
-    # ========================================================
-    # LIMITAR EL CAMPO FINCA
-    # ========================================================
 
     def formfield_for_foreignkey(
         self,
@@ -445,22 +322,12 @@ class PotreroAdmin(GISModelAdmin):
         request,
         **kwargs,
     ):
-        """
-        Cuando un usuario normal crea un potrero,
-        solamente puede seleccionar fincas que tenga
-        asignadas mediante UsuarioFinca.
-        """
-
         if db_field.name == 'finca':
-
             if usuario_es_superusuario(request):
-
                 kwargs['queryset'] = Finca.objects.filter(
                     is_active=True,
                 )
-
             else:
-
                 kwargs['queryset'] = obtener_fincas_usuario(
                     request.user,
                 )
@@ -471,10 +338,6 @@ class PotreroAdmin(GISModelAdmin):
             **kwargs,
         )
 
-    # ========================================================
-    # SEGURIDAD ADICIONAL AL GUARDAR
-    # ========================================================
-
     def save_model(
         self,
         request,
@@ -482,16 +345,7 @@ class PotreroAdmin(GISModelAdmin):
         form,
         change,
     ):
-        """
-        Segunda barrera de seguridad.
-
-        Aunque alguien manipule el formulario,
-        no puede guardar un potrero en una finca
-        que no tenga autorizada.
-        """
-
         if not usuario_es_superusuario(request):
-
             if not usuario_puede_acceder_finca(
                 request,
                 obj.finca,
@@ -507,10 +361,6 @@ class PotreroAdmin(GISModelAdmin):
             form,
             change,
         )
-
-    # ========================================================
-    # FIELDSETS
-    # ========================================================
 
     fieldsets = (
         (
@@ -575,21 +425,6 @@ class PotreroAdmin(GISModelAdmin):
         ),
     )
 
-
-# ============================================================
-# ADMINISTRACIÓN DE USUARIOS POR FINCA
-#
-# Relación:
-#
-# Usuario Django
-#       ↓
-# UsuarioFinca
-#       ↓
-#      Finca
-#
-# Esta tabla determina qué usuario puede acceder
-# a qué finca y con qué rol.
-# ============================================================
 
 @admin.register(UsuarioFinca)
 class UsuarioFincaAdmin(admin.ModelAdmin):
@@ -657,30 +492,18 @@ class UsuarioFincaAdmin(admin.ModelAdmin):
         'usuario',
     )
 
-    # ========================================================
-    # LISTADO DE MEMBRESÍAS
-    # ========================================================
-
     def get_queryset(self, request):
-
         queryset = super().get_queryset(request)
 
         if usuario_es_superusuario(request):
             return queryset
 
-        # Un usuario normal solamente puede ver
-        # sus propias membresías.
         return queryset.filter(
             usuario=request.user,
             activa=True,
         )
 
-    # ========================================================
-    # VISUALIZACIÓN
-    # ========================================================
-
     def has_view_permission(self, request, obj=None):
-
         if not request.user.is_authenticated:
             return False
 
@@ -695,31 +518,11 @@ class UsuarioFincaAdmin(admin.ModelAdmin):
             and obj.activa
         )
 
-    # ========================================================
-    # CREACIÓN
-    # ========================================================
-
     def has_add_permission(self, request):
-
-        """
-        Solamente el superusuario puede asignar
-        usuarios a fincas.
-        """
-
         return usuario_es_superusuario(request)
-
-    # ========================================================
-    # MODIFICACIÓN
-    # ========================================================
 
     def has_change_permission(self, request, obj=None):
-
         return usuario_es_superusuario(request)
 
-    # ========================================================
-    # ELIMINACIÓN
-    # ========================================================
-
     def has_delete_permission(self, request, obj=None):
-
         return usuario_es_superusuario(request)
