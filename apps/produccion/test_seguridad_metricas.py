@@ -1,19 +1,24 @@
+from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 
-from apps.core.models import Finca
-from apps.ganado.models import PesajeAnimal
+from apps.core.models import Finca, UsuarioFinca
 from apps.produccion.models import Metrica, VariableMetrica
 from apps.produccion.services.seguridad_metricas import (
     ConfiguracionMetricaInsegura,
     validar_formula_segura,
     validar_metrica_configurable,
+    verificar_ejecucion_segura,
 )
 
 
 class SeguridadMetricasTest(TestCase):
     def setUp(self):
         self.finca = Finca.objects.create(nombre="Finca Seguridad")
+        self.otro_finca = Finca.objects.create(nombre="Otra Finca")
+        self.user = User.objects.create_user(username="operador", password="x")
+        self.otro_user = User.objects.create_user(username="otro", password="x")
+        UsuarioFinca.objects.create(usuario=self.user, finca=self.finca, rol="operador")
         self.metrica = Metrica.objects.create(
             finca=self.finca,
             nombre="Prueba segura",
@@ -85,3 +90,20 @@ class SeguridadMetricasTest(TestCase):
         )
         with self.assertRaises(ConfiguracionMetricaInsegura):
             validar_metrica_configurable(metrica)
+
+    def test_usuario_autorizado_puede_validar_finca(self):
+        verificar_ejecucion_segura(self.user, self.metrica)
+
+    def test_usuario_de_otra_finca_es_rechazado(self):
+        UsuarioFinca.objects.create(
+            usuario=self.otro_user,
+            finca=self.otro_finca,
+            rol="operador",
+        )
+        with self.assertRaises(PermissionDenied):
+            verificar_ejecucion_segura(self.otro_user, self.metrica)
+
+    def test_usuario_no_autenticado_es_rechazado(self):
+        anonymous = User(is_authenticated=False)
+        with self.assertRaises(PermissionDenied):
+            verificar_ejecucion_segura(anonymous, self.metrica)
