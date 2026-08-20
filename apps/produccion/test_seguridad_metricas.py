@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.test import TestCase
+from django.contrib.auth.models import AnonymousUser
+
 
 from apps.core.models import Finca, UsuarioFinca
 from apps.produccion.models import Metrica, VariableMetrica
@@ -104,6 +106,7 @@ class SeguridadMetricasTest(TestCase):
             verificar_ejecucion_segura(self.otro_user, self.metrica)
 
     def test_usuario_no_autenticado_es_rechazado(self):
-        anonymous = User(is_authenticated=False)
+        
+        anonymous = AnonymousUser()
         with self.assertRaises(PermissionDenied):
             verificar_ejecucion_segura(anonymous, self.metrica)
