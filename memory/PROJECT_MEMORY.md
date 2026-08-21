@@ -542,3 +542,83 @@ repositorio al 2026-08-19.
 El siguiente trabajo debe partir de este estado y no reconstruir el modelo
 de tenant desde cero. Cualquier modificación futura de seguridad deberá
 preservar las pruebas de aislamiento y la evidencia reproducible.
+
+---
+
+## 18. REGLA OPERATIVA DE RAMAS Y SINCRONIZACIÓN
+
+Fecha: 2026-08-21
+Estado: DECISIÓN VIGENTE
+
+`main` es la fuente oficial del sistema Hato.
+
+Actualización normal de la VM:
+
+    git checkout main
+    git pull origin main
+
+Las ramas `feature/...` son para desarrollo, revisión o pruebas puntuales.
+No deben utilizarse como sustituto de la actualización normal de `main`.
+
+La razón es evitar que una actualización puntual omita cambios de otras
+funcionalidades que ya fueron integrados en el sistema. Cuando una feature
+se valida y se integra, la VM vuelve a sincronizarse desde `main`.
+
+---
+
+## 19. OPERATIVIDAD DE PESAJES — HATO V1
+
+Fecha: 2026-08-21
+Estado: IMPLEMENTACIÓN EN PRUEBA / PENDIENTE DE VALIDACIÓN EN VM
+
+El modelo `PesajeAnimal` ya existía y queda ahora expuesto mediante una
+interfaz operativa propia, sin depender del Django Admin.
+
+### 19.1 Funcionalidades implementadas
+
+- listado de pesajes de la finca activa;
+- búsqueda por número de arete o nombre del animal;
+- registro de pesaje;
+- edición de pesaje;
+- historial de pesajes por animal;
+- acceso al historial y registro desde la ficha del animal;
+- entrada `⚖️ Pesajes` en el menú operativo de Ganado.
+
+### 19.2 Seguridad y permisos
+
+La implementación reutiliza el contexto multi-finca existente.
+
+Roles con gestión:
+
+- superusuario;
+- propietario;
+- administrador.
+
+El rol `operador` puede consultar, pero no registrar ni modificar pesajes.
+
+El formulario limita el selector de animales a la finca activa y las vistas
+verifican nuevamente la pertenencia del animal a la finca antes de guardar.
+
+### 19.3 Validación de datos
+
+El formulario exige peso estrictamente mayor que cero.
+La fecha/hora se captura mediante `datetime-local` y el modelo mantiene el
+registro ordenado por fecha descendente.
+
+### 19.4 Pruebas preparadas
+
+Se añadió `apps/ganado/test_pesajes_operativos.py` con cobertura para:
+
+1. existencia y acceso de la URL del módulo;
+2. creación por administrador;
+3. consulta sin gestión por operador;
+4. aislamiento entre fincas;
+5. rechazo de peso cero.
+
+Las pruebas deben ejecutarse en la VM antes de considerar la etapa cerrada.
+
+### 19.5 Estado
+
+**EN PRUEBA:** código preparado en la rama `feature/pesajes-operativos`.
+La publicación definitiva en `main` queda condicionada a la validación de
+las pruebas y del sistema en la VM.
