@@ -1,7 +1,6 @@
 from django import forms
 
 from .models import Animal
-from apps.core.tenant import obtener_finca_activa
 
 
 class AnimalForm(forms.ModelForm):
@@ -42,11 +41,6 @@ class AnimalForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        instance = self.instance
         if self.finca is not None:
-            instance.finca = self.finca
-        instance.__dict__.update({k: v for k, v in cleaned.items() if k in self.fields})
-        if self.finca is not None:
-            instance.finca = self.finca
-        self.instance = instance
+            self.instance.finca = self.finca
         return cleaned
