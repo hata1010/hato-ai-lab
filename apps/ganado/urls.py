@@ -18,5 +18,6 @@ urlpatterns = [
     path("movilidad/", movilidad_views.lista_movilidad, name="lista_movilidad"),
     path("movilidad/crear/", movilidad_views.crear_movimiento, name="crear_movimiento"),
     path("movilidad/animal/<int:animal_id>/", movilidad_views.historial_movilidad_animal, name="historial_movilidad_animal"),
+    path("movilidad/<int:movimiento_id>/cambiar-potrero/", movilidad_views.cambiar_potrero, name="cambiar_potrero"),
     path("movilidad/<int:movimiento_id>/cerrar/", movilidad_views.cerrar_movimiento, name="cerrar_movimiento"),
 ]
