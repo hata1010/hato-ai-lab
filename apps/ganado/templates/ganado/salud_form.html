@@ -1,0 +1,27 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}{% if modo == 'editar' %}Editar evento{% else %}Registrar evento{% endif %} · Salud{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div>
+        <h1>🩺 {% if modo == "editar" %}Editar evento de salud{% else %}Registrar evento de salud{% endif %}</h1>
+        <p>{{ finca.nombre }}</p>
+    </div>
+    <a href="{% if evento %}{% url 'ganado:historia_salud_animal' evento.animal_id %}{% else %}{% url 'ganado:lista_salud' %}{% endif %}">← Volver</a>
+</div>
+
+<form method="post" style="max-width:760px;">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div>{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}
+    <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        {% for error in field.errors %}<br><strong>{{ error }}</strong>{% endfor %}
+    </p>
+    {% endfor %}
+    <button type="submit">💾 {% if modo == "editar" %}Guardar cambios{% else %}Registrar evento{% endif %}</button>
+</form>
+{% endblock %}

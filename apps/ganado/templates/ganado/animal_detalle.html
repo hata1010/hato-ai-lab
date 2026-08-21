@@ -37,7 +37,10 @@
 </section>
 
 <section>
-<h2>🩺 Salud</h2>
-{% if eventos_salud %}<table><tr><th>Fecha</th><th>Evento</th><th>Producto</th><th>Veterinario</th></tr>{% for e in eventos_salud %}<tr><td>{{ e.fecha }}</td><td>{{ e.get_tipo_display }}</td><td>{{ e.producto|default:"—" }}</td><td>{{ e.nombre_veterinario|default:"—" }}</td></tr>{% endfor %}</table>{% else %}<p>Sin eventos de salud registrados.</p>{% endif %}
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <h2>🩺 Salud</h2>
+    <div><a href="{% url 'ganado:historia_salud_animal' animal.id %}">Ver historia clínica completa</a>{% if puede_gestionar %} · <a href="{% url 'ganado:crear_evento_salud' %}?animal={{ animal.id }}">➕ Registrar evento</a>{% endif %}</div>
+</div>
+{% if eventos_salud %}<table><tr><th>Fecha</th><th>Evento</th><th>Producto</th><th>Dosis</th><th>Veterinario</th></tr>{% for e in eventos_salud|slice:":5" %}<tr><td>{{ e.fecha }}</td><td>{{ e.get_tipo_display }}</td><td>{{ e.producto|default:"—" }}</td><td>{{ e.dosis|default:"—" }}</td><td>{{ e.nombre_veterinario|default:"—" }}</td></tr>{% endfor %}</table>{% else %}<p>Sin eventos de salud registrados.</p>{% endif %}
 </section>
 {% endblock %}
