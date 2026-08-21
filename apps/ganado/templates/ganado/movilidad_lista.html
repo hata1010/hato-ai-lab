@@ -1,0 +1,37 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Movilidad del ganado · Hato{% endblock %}
+
+{% block content %}
+<h1>🔄 Movilidad del ganado</h1>
+<p><strong>Finca:</strong> {{ finca.nombre }} · <strong>Rol:</strong> {{ rol }}</p>
+
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0;">
+    <form method="get">
+        <input type="search" name="q" value="{{ consulta }}" placeholder="Arete, animal o potrero">
+        <select name="estado">
+            <option value="">Todos</option>
+            <option value="activos" {% if estado_actual == "activos" %}selected{% endif %}>Activos</option>
+            <option value="cerrados" {% if estado_actual == "cerrados" %}selected{% endif %}>Cerrados</option>
+        </select>
+        <button type="submit">Buscar</button>
+    </form>
+    {% if puede_gestionar %}<a href="{% url 'ganado:crear_movimiento' %}">➕ Registrar movimiento</a>{% endif %}
+</div>
+
+<table>
+<thead><tr><th>Animal</th><th>Potrero</th><th>Entrada</th><th>Salida</th><th>Estado</th><th></th></tr></thead>
+<tbody>
+{% for movimiento in movimientos %}
+<tr>
+    <td><a href="{% url 'ganado:detalle_animal' movimiento.animal.id %}">{{ movimiento.animal }}</a></td>
+    <td>{{ movimiento.potrero }}</td>
+    <td>{{ movimiento.fecha_entrada|date:"d/m/Y H:i" }}</td>
+    <td>{{ movimiento.fecha_salida|date:"d/m/Y H:i"|default:"—" }}</td>
+    <td>{% if movimiento.activo %}🟢 Activo{% else %}⚪ Cerrado{% endif %}</td>
+    <td>{% if movimiento.activo and puede_gestionar %}<a href="{% url 'ganado:cerrar_movimiento' movimiento.id %}">Cerrar</a>{% endif %}</td>
+</tr>
+{% empty %}<tr><td colspan="6">No hay movimientos registrados en la finca activa.</td></tr>{% endfor %}
+</tbody>
+</table>
+{% endblock %}
