@@ -1,0 +1,43 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Salud animal · {{ finca.nombre }}{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div>
+        <h1>🩺 Salud / Historia clínica</h1>
+        <p>Eventos sanitarios registrados en {{ finca.nombre }}.</p>
+    </div>
+    {% if puede_gestionar %}<a href="{% url 'ganado:crear_evento_salud' %}">➕ Registrar evento</a>{% endif %}
+</div>
+
+<form method="get" style="margin:18px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:end;">
+    <label>Buscar<br><input type="search" name="q" value="{{ consulta }}" placeholder="Arete, producto o veterinario"></label>
+    <label>Tipo<br><select name="tipo"><option value="">Todos</option>{% for value,label in tipos %}<option value="{{ value }}"{% if tipo_actual == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+    <button type="submit">Filtrar</button>
+    <a href="{% url 'ganado:lista_salud' %}">Limpiar</a>
+</form>
+
+<section>
+{% if eventos %}
+<table>
+    <thead><tr><th>Fecha</th><th>Animal</th><th>Evento</th><th>Producto</th><th>Dosis</th><th>Veterinario</th><th>Acciones</th></tr></thead>
+    <tbody>
+    {% for evento in eventos %}
+    <tr>
+        <td>{{ evento.fecha }}</td>
+        <td><a href="{% url 'ganado:historia_salud_animal' evento.animal_id %}">{{ evento.animal }}</a></td>
+        <td>{{ evento.get_tipo_display }}</td>
+        <td>{{ evento.producto|default:"—" }}</td>
+        <td>{{ evento.dosis|default:"—" }}</td>
+        <td>{{ evento.nombre_veterinario|default:"—" }}</td>
+        <td>{% if puede_gestionar %}<a href="{% url 'ganado:editar_evento_salud' evento.id %}">✏️ Editar</a>{% else %}Consulta{% endif %}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No hay eventos de salud registrados para la finca activa.</p>
+{% endif %}
+</section>
+{% endblock %}
