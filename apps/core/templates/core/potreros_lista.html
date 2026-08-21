@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Potreros · {{ finca.nombre }}</title>
+    <style>
+        body{font-family:system-ui,sans-serif;background:#f5f7fa;margin:0;color:#24303a}.wrap{max-width:1100px;margin:30px auto;padding:0 20px}.top{display:flex;justify-content:space-between;align-items:center;gap:15px}.card{background:#fff;border-radius:12px;padding:20px;margin-top:18px;box-shadow:0 2px 10px #00000012}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;border-bottom:1px solid #e5e7eb}a{color:#1769aa;text-decoration:none}.btn{display:inline-block;padding:9px 13px;border-radius:7px;background:#1769aa;color:#fff}.btn.secondary{background:#eef2f7;color:#24303a}.status{font-weight:700}.msg{background:#dcfce7;padding:10px;border-radius:8px;margin-top:12px}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="top">
+        <div><h1>🌱 Potreros</h1><div>{{ finca.nombre }} · rol: {{ rol }}</div></div>
+        <div><a class="btn secondary" href="{% url 'mapa_finca_activa' %}">🗺️ Mapa</a>{% if puede_gestionar %} <a class="btn" href="{% url 'potreros:crear' %}">+ Nuevo potrero</a>{% endif %}</div>
+    </div>
+    {% for message in messages %}<div class="msg">{{ message }}</div>{% endfor %}
+    <div class="card">
+        {% if potreros %}
+        <table>
+            <thead><tr><th>Código</th><th>Nombre</th><th>Tipo</th><th>Área</th><th>Carga</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            {% for potrero in potreros %}
+            <tr>
+                <td>{{ potrero.codigo }}</td><td><a href="{% url 'potreros:detalle' potrero.id %}">{{ potrero.nombre }}</a></td><td>{{ potrero.get_tipo_display }}</td>
+                <td>{% if potrero.area_hectareas %}{{ potrero.area_hectareas }} ha{% else %}—{% endif %}</td>
+                <td>{{ potrero.carga_actual }}{% if potrero.capacidad_animales %} / {{ potrero.capacidad_animales }}{% endif %}</td>
+                <td class="status">{{ potrero.get_estado_display }}</td>
+                <td><a href="{% url 'potreros:detalle' potrero.id %}">Ver</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}<p>No hay potreros registrados en la finca activa.</p>{% endif %}
+    </div>
+    <p><a href="{% url 'administrador:dashboard' %}">← Inicio</a></p>
+</div>
+</body>
+</html>
