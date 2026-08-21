@@ -1,0 +1,23 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}{% if modo == "crear" %}Registrar{% else %}Editar{% endif %} animal · {{ finca.nombre }}{% endblock %}
+
+{% block content %}
+<h1>🐄 {% if modo == "crear" %}Registrar animal{% else %}Editar animal{% endif %}</h1>
+<p><strong>Finca:</strong> {{ finca.nombre }} · <strong>Rol:</strong> {{ rol }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+        <div style="margin:12px 0;">
+            <label for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong></label><br>
+            {{ field }}
+            {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+            {% for error in field.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
+        </div>
+    {% endfor %}
+    <button type="submit">💾 Guardar</button>
+    <a href="{% if animal %}{% url 'ganado:detalle_animal' animal.id %}{% else %}{% url 'ganado:lista_animales' %}{% endif %}">Cancelar</a>
+</form>
+{% endblock %}
