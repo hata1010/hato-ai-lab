@@ -1,0 +1,45 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Animales · {{ finca.nombre }}{% endblock %}
+
+{% block content %}
+<h1>🐄 Animales</h1>
+<p><strong>Finca activa:</strong> {{ finca.nombre }} · <strong>Rol:</strong> {{ rol|default:"—" }}</p>
+
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin:18px 0;">
+    <form method="get" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="search" name="q" value="{{ consulta }}" placeholder="Arete o nombre">
+        <select name="estado">
+            <option value="">Todos los estados</option>
+            {% for value,label in estados %}<option value="{{ value }}" {% if estado_actual == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        <select name="sexo">
+            <option value="">Todos</option>
+            {% for value,label in sexos %}<option value="{{ value }}" {% if sexo_actual == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        <button type="submit">Filtrar</button>
+        <a href="{% url 'ganado:lista_animales' %}">Limpiar</a>
+    </form>
+    {% if puede_gestionar %}<a href="{% url 'ganado:crear_animal' %}">➕ Registrar animal</a>{% endif %}
+</div>
+
+<table>
+    <thead><tr><th>Arete</th><th>Nombre</th><th>Especie</th><th>Raza</th><th>Sexo</th><th>Categoría</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+    {% for animal in animales %}
+        <tr>
+            <td><strong>{{ animal.numero_arete }}</strong></td>
+            <td>{{ animal.nombre_propio|default:"—" }}</td>
+            <td>{{ animal.especie }}</td>
+            <td>{{ animal.raza_declarada|default:"—" }}</td>
+            <td>{{ animal.get_sexo_display }}</td>
+            <td>{{ animal.categoria|default:"—" }}</td>
+            <td>{{ animal.get_estado_display }}</td>
+            <td><a href="{% url 'ganado:detalle_animal' animal.id %}">Ver ficha</a></td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="8">No hay animales registrados en la finca activa.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

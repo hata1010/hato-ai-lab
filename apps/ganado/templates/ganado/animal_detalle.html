@@ -1,0 +1,43 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Ficha {{ animal.numero_arete }} · {{ finca.nombre }}{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div><h1>🐄 {{ animal.numero_arete }}</h1><p>{{ animal.nombre_propio|default:"Sin nombre" }} · {{ finca.nombre }}</p></div>
+    <div><a href="{% url 'ganado:lista_animales' %}">← Animales</a>{% if puede_gestionar %} · <a href="{% url 'ganado:editar_animal' animal.id %}">✏️ Editar</a>{% endif %}</div>
+</div>
+
+<section>
+<h2>Identidad</h2>
+<p><strong>Especie:</strong> {{ animal.especie }}</p>
+<p><strong>Raza:</strong> {{ animal.raza_declarada|default:"No especificada" }}</p>
+<p><strong>Sexo:</strong> {{ animal.get_sexo_display }}</p>
+<p><strong>Fecha de nacimiento:</strong> {{ animal.fecha_nacimiento|default:"No registrada" }}</p>
+<p><strong>Categoría:</strong> {{ animal.categoria|default:"No registrada" }}</p>
+<p><strong>Estado:</strong> {{ animal.get_estado_display }}{% if not animal.is_active %} · Inactivo{% endif %}</p>
+</section>
+
+<section>
+<h2>Identificación y genealogía</h2>
+<p><strong>Microchip:</strong> {{ animal.microchip|default:"—" }} · <strong>Tatuaje:</strong> {{ animal.tatuaje|default:"—" }}</p>
+<p><strong>Registro genealógico:</strong> {{ animal.registro_genealogico|default:"—" }}</p>
+<p><strong>Padre:</strong> {{ animal.padre|default:"—" }} · <strong>Madre:</strong> {{ animal.madre|default:"—" }}</p>
+<p><strong>Observaciones:</strong> {{ animal.observaciones|default:"—" }}</p>
+</section>
+
+<section>
+<h2>🔄 Movilidad</h2>
+{% if movimientos %}<table><tr><th>Potrero</th><th>Entrada</th><th>Salida</th><th>Activo</th></tr>{% for m in movimientos %}<tr><td>{{ m.potrero }}</td><td>{{ m.fecha_entrada }}</td><td>{{ m.fecha_salida|default:"—" }}</td><td>{{ m.activo|yesno:"Sí,No" }}</td></tr>{% endfor %}</table>{% else %}<p>Sin movimientos registrados.</p>{% endif %}
+</section>
+
+<section>
+<h2>⚖️ Pesajes</h2>
+{% if pesajes %}<table><tr><th>Fecha</th><th>Peso</th><th>Observaciones</th></tr>{% for p in pesajes %}<tr><td>{{ p.fecha }}</td><td>{{ p.peso_kg }} kg</td><td>{{ p.observaciones|default:"—" }}</td></tr>{% endfor %}</table>{% else %}<p>Sin pesajes registrados.</p>{% endif %}
+</section>
+
+<section>
+<h2>🩺 Salud</h2>
+{% if eventos_salud %}<table><tr><th>Fecha</th><th>Evento</th><th>Producto</th><th>Veterinario</th></tr>{% for e in eventos_salud %}<tr><td>{{ e.fecha }}</td><td>{{ e.get_tipo_display }}</td><td>{{ e.producto|default:"—" }}</td><td>{{ e.nombre_veterinario|default:"—" }}</td></tr>{% endfor %}</table>{% else %}<p>Sin eventos de salud registrados.</p>{% endif %}
+</section>
+{% endblock %}

@@ -38,4 +38,5 @@ urlpatterns = [
     # MÓDULOS DE APLICACIONES
     path("administrador/", include("apps.administrador.urls")),
     path("produccion/", include("apps.produccion.urls")),
+    path("ganado/", include("apps.ganado.urls")),
 ]
