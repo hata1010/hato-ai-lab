@@ -1,0 +1,46 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Historia clínica {{ animal.numero_arete }} · {{ finca.nombre }}{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div>
+        <h1>🩺 Historia clínica · {{ animal.numero_arete }}</h1>
+        <p>{{ animal.nombre_propio|default:"Sin nombre" }} · {{ finca.nombre }}</p>
+    </div>
+    <div>
+        <a href="{% url 'ganado:lista_salud' %}">← Salud</a>
+        {% if puede_gestionar %} · <a href="{% url 'ganado:crear_evento_salud' %}?animal={{ animal.id }}">➕ Registrar evento</a>{% endif %}
+    </div>
+</div>
+
+<section>
+    <h2>🐄 Animal</h2>
+    <p><strong>Arete:</strong> {{ animal.numero_arete }} · <strong>Especie:</strong> {{ animal.especie }} · <strong>Sexo:</strong> {{ animal.get_sexo_display }}</p>
+    <p><strong>Estado:</strong> {{ animal.get_estado_display }}</p>
+</section>
+
+<section>
+    <h2>Antecedentes sanitarios</h2>
+    {% if eventos %}
+    <table>
+        <thead><tr><th>Fecha</th><th>Tipo</th><th>Producto / diagnóstico</th><th>Dosis</th><th>Veterinario</th><th>Observaciones</th><th>Acción</th></tr></thead>
+        <tbody>
+        {% for evento in eventos %}
+        <tr>
+            <td>{{ evento.fecha }}</td>
+            <td>{{ evento.get_tipo_display }}</td>
+            <td>{{ evento.producto|default:"—" }}</td>
+            <td>{{ evento.dosis|default:"—" }}</td>
+            <td>{{ evento.nombre_veterinario|default:"—" }}</td>
+            <td>{{ evento.observaciones|default:"—" }}</td>
+            <td>{% if puede_gestionar %}<a href="{% url 'ganado:editar_evento_salud' evento.id %}">✏️ Editar</a>{% else %}Consulta{% endif %}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No hay antecedentes sanitarios registrados para este animal.</p>
+    {% endif %}
+</section>
+{% endblock %}
