@@ -5,12 +5,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Gestión Ganadera{% endblock %}</title>
+    <title>{% block title %}Hato{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'administrador/css/dashboard.css' %}">
 </head>
 <body>
 <header class="topbar">
-    <div class="brand">🐄 Gestión Ganadera</div>
+    <div class="brand">🐄 Hato</div>
     <div class="user-area">
         {% if user.is_authenticated %}
             <span>{{ user.username }}</span>
@@ -26,19 +26,26 @@
 <div class="layout">
     <aside class="sidebar">
         <nav>
-            <a href="{% url 'administrador:dashboard' %}">🏠 Dashboard</a>
-            <a href="{% url 'produccion:lista_metricas' %}">📊 Definición de Métricas</a>
+            <a href="{% url 'administrador:dashboard' %}">🏠 Inicio</a>
+
+            <div class="menu-section">🌾 FINCAS</div>
+            <a href="{% url 'seleccionar_finca' %}">🌾 Seleccionar finca</a>
+            <a href="{% url 'mapa_finca' finca_id=1 %}">🗺️ Mapa de finca</a>
+
+            <div class="menu-section">📊 PRODUCCIÓN</div>
+            <a href="{% url 'produccion:indicadores' %}">📈 Indicadores</a>
+            <a href="{% url 'produccion:lista_metricas' %}">📊 Métricas</a>
+            <a href="{% url 'produccion:prueba_motor' %}">⚙️ Motor de métricas</a>
+
             {% if user.is_superuser %}
+            <div class="menu-section">🌐 GLOBAL</div>
             <a href="{% url 'produccion:metricas_globales_lista' %}" style="background:rgba(109,40,217,0.10);color:#6d28d9;font-weight:800;border-left:3px solid #6d28d9;">
                 🌐 Métricas Globales (ROOT)
             </a>
+
+            <div class="menu-section">⚙️ ADMINISTRACIÓN</div>
+            <a href="/admin/">🔐 Administración técnica</a>
             {% endif %}
-            <a href="{% url 'produccion:indicadores' %}">📈 Indicadores</a>
-            <a href="/admin/ganado/animal/">🐄 Ganado</a>
-            <a href="/admin/core/potrero/">🌱 Potreros</a>
-            <a href="/admin/ganado/eventosalud/">❤️ Salud</a>
-            <a href="/admin/">📦 Recursos</a>
-            <a href="/finca/1/mapa/">🗺️ Mapa</a>
         </nav>
     </aside>
 
