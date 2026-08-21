@@ -9,3 +9,4 @@ class GanadoConfig(AppConfig):
         # Registra los modelos zootécnicos adicionales sin duplicar
         # la definición existente de apps.ganado.models.
         from . import models_reproduccion  # noqa: F401
+        from . import admin_reproduccion  # noqa: F401
