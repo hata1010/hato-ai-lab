@@ -1,0 +1,25 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Movilidad {{ animal.numero_arete }} · Hato{% endblock %}
+
+{% block content %}
+<h1>🔄 Historial de movilidad</h1>
+<p><strong>Animal:</strong> {{ animal }} · <strong>Finca:</strong> {{ finca.nombre }}</p>
+<p><a href="{% url 'ganado:detalle_animal' animal.id %}">← Ficha del animal</a>{% if puede_gestionar %} · <a href="{% url 'ganado:crear_movimiento' %}?animal={{ animal.id }}">➕ Registrar entrada / cambio de potrero</a>{% endif %}</p>
+
+<table>
+<thead><tr><th>Potrero</th><th>Entrada</th><th>Salida</th><th>Estado</th><th>Observaciones</th><th></th></tr></thead>
+<tbody>
+{% for movimiento in movimientos %}
+<tr>
+    <td>{{ movimiento.potrero }}</td>
+    <td>{{ movimiento.fecha_entrada|date:"d/m/Y H:i" }}</td>
+    <td>{{ movimiento.fecha_salida|date:"d/m/Y H:i"|default:"—" }}</td>
+    <td>{% if movimiento.activo %}🟢 Activo{% else %}⚪ Cerrado{% endif %}</td>
+    <td>{{ movimiento.observaciones|default:"—" }}</td>
+    <td>{% if movimiento.activo and puede_gestionar %}<a href="{% url 'ganado:cerrar_movimiento' movimiento.id %}">Cerrar movimiento</a>{% endif %}</td>
+</tr>
+{% empty %}<tr><td colspan="6">Sin movimientos registrados.</td></tr>{% endfor %}
+</tbody>
+</table>
+{% endblock %}
