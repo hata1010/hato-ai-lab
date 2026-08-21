@@ -1,0 +1,16 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Cerrar movimiento · Hato{% endblock %}
+
+{% block content %}
+<h1>🔄 Cerrar movimiento</h1>
+<p><strong>Animal:</strong> {{ movimiento.animal }}</p>
+<p><strong>Potrero actual:</strong> {{ movimiento.potrero }}</p>
+<p><strong>Entrada:</strong> {{ movimiento.fecha_entrada|date:"d/m/Y H:i" }}</p>
+<form method="post">
+    {% csrf_token %}
+    <p>¿Confirmas el cierre del movimiento actual?</p>
+    <button type="submit">Cerrar movimiento</button>
+    <a href="{% url 'ganado:historial_movilidad_animal' movimiento.animal_id %}">Cancelar</a>
+</form>
+{% endblock %}
