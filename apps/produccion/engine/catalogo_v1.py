@@ -1,4 +1,4 @@
-"""Catálogo oficial de las 8 métricas preconstruidas V1 de Hato AI."""
+"""Catálogo oficial de métricas preconstruidas V1 de Hato AI."""
 
 from .definicion import DefinicionMetrica
 
@@ -65,6 +65,30 @@ METRICAS_V1 = {
         estrategia={"modo":"formula","formula":"animales / hectareas",
                     "dependencias":["CANT_ANIMALES_TOTAL","SUP_TOTAL_POTREROS"]},
         descripcion="Relación entre cabezas de ganado totales y hectáreas de pastoreo.",
+    ),
+    "IEP_ANIMAL": DefinicionMetrica(
+        codigo="IEP_ANIMAL", nombre="Intervalo entre partos", tipo="temporal",
+        familia="reproduccion", unidad="dias", precision_decimales=0,
+        estrategia={"modo":"pipeline","pasos":[{"funcion":"IEP_ANIMAL"}]},
+        descripcion="Días transcurridos entre los dos partos más recientes de una hembra.",
+    ),
+    "DIAS_ABIERTOS_ANIMAL": DefinicionMetrica(
+        codigo="DIAS_ABIERTOS_ANIMAL", nombre="Días abiertos", tipo="temporal",
+        familia="reproduccion", unidad="dias", precision_decimales=0,
+        estrategia={"modo":"pipeline","pasos":[{"funcion":"DIAS_ABIERTOS_ANIMAL"}]},
+        descripcion="Días entre el último parto y el primer diagnóstico de gestación positivo posterior registrado.",
+    ),
+    "LECHE_ACUM_LACTANCIA": DefinicionMetrica(
+        codigo="LECHE_ACUM_LACTANCIA", nombre="Producción acumulada de lactancia", tipo="agregada",
+        familia="lactancia", unidad="unidad_control", precision_decimales=3,
+        estrategia={"modo":"pipeline","pasos":[{"funcion":"LECHE_ACUM_LACTANCIA"}]},
+        descripcion="Suma de los controles de una lactancia cuando toda la serie utiliza una única unidad explícita.",
+    ),
+    "DURACION_LACTANCIA": DefinicionMetrica(
+        codigo="DURACION_LACTANCIA", nombre="Duración de lactancia", tipo="temporal",
+        familia="lactancia", unidad="dias", precision_decimales=0,
+        estrategia={"modo":"pipeline","pasos":[{"funcion":"DURACION_LACTANCIA"}]},
+        descripcion="Días entre inicio y fecha de secado de una lactancia cerrada.",
     ),
 }
 
