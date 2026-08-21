@@ -21,6 +21,7 @@ class MovilidadOperativaTests(TestCase):
         UsuarioFinca.objects.create(usuario=self.otra_admin, finca=self.otra_finca, rol="administrador")
         self.potrero = Potrero.objects.create(finca=self.finca, nombre="Potrero 1", codigo="P1")
         self.otro_potrero = Potrero.objects.create(finca=self.otra_finca, nombre="Potrero B", codigo="PB")
+        self.potrero_2 = Potrero.objects.create(finca=self.finca, nombre="Potrero 2", codigo="P2")
         self.especie = Especie.objects.create(nombre="Bovino movilidad")
         self.animal = Animal.objects.create(finca=self.finca, numero_arete="MOV-001", sexo="H", especie=self.especie)
         self.otro_animal = Animal.objects.create(finca=self.otra_finca, numero_arete="MOV-002", sexo="M", especie=self.especie)
@@ -78,14 +79,80 @@ class MovilidadOperativaTests(TestCase):
             "potrero": self.potrero.id,
             "fecha_entrada": "2026-08-21T10:00",
         })
-        otro_potrero = Potrero.objects.create(finca=self.finca, nombre="Potrero 2", codigo="P2")
         response = self.client.post(reverse("ganado:crear_movimiento"), {
             "animal": self.animal.id,
-            "potrero": otro_potrero.id,
+            "potrero": self.potrero_2.id,
             "fecha_entrada": "2026-08-21T12:00",
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(MovimientoAnimal.objects.filter(animal=self.animal, activo=True).count(), 1)
+
+    def test_cambiar_potrero_cierra_anterior_y_crea_nuevo(self):
+        movimiento = MovimientoAnimal.objects.create(
+            animal=self.animal, potrero=self.potrero,
+            fecha_entrada=timezone.make_aware(timezone.datetime(2026, 8, 21, 10, 0)),
+            activo=True,
+        )
+        self.client.force_login(self.admin)
+        self._activar_finca(self.finca)
+        response = self.client.post(reverse("ganado:cambiar_potrero", args=[movimiento.id]), {
+            "potrero": self.potrero_2.id,
+            "fecha_entrada": "2026-08-21T12:00",
+            "observaciones": "Cambio por rotación de pastoreo",
+        })
+        self.assertEqual(response.status_code, 302)
+        movimiento.refresh_from_db()
+        self.assertFalse(movimiento.activo)
+        self.assertEqual(movimiento.potrero_id, self.potrero.id)
+        nuevo = MovimientoAnimal.objects.get(animal=self.animal, activo=True)
+        self.assertEqual(nuevo.potrero_id, self.potrero_2.id)
+        self.assertEqual(nuevo.observaciones, "Cambio por rotación de pastoreo")
+        self.assertEqual(MovimientoAnimal.objects.filter(animal=self.animal).count(), 2)
+
+    def test_cambio_al_mismo_potrero_no_se_permite(self):
+        movimiento = MovimientoAnimal.objects.create(
+            animal=self.animal, potrero=self.potrero,
+            fecha_entrada=timezone.make_aware(timezone.datetime(2026, 8, 21, 10, 0)),
+            activo=True,
+        )
+        self.client.force_login(self.admin)
+        self._activar_finca(self.finca)
+        response = self.client.post(reverse("ganado:cambiar_potrero", args=[movimiento.id]), {
+            "potrero": self.potrero.id,
+            "fecha_entrada": "2026-08-21T12:00",
+        })
+        self.assertEqual(response.status_code, 200)
+        movimiento.refresh_from_db()
+        self.assertTrue(movimiento.activo)
+        self.assertEqual(MovimientoAnimal.objects.filter(animal=self.animal).count(), 1)
+
+    def test_cambio_no_puede_usar_potrero_de_otra_finca(self):
+        movimiento = MovimientoAnimal.objects.create(
+            animal=self.animal, potrero=self.potrero,
+            fecha_entrada=timezone.make_aware(timezone.datetime(2026, 8, 21, 10, 0)),
+            activo=True,
+        )
+        self.client.force_login(self.admin)
+        self._activar_finca(self.finca)
+        response = self.client.post(reverse("ganado:cambiar_potrero", args=[movimiento.id]), {
+            "potrero": self.otro_potrero.id,
+            "fecha_entrada": "2026-08-21T12:00",
+        })
+        self.assertEqual(response.status_code, 200)
+        movimiento.refresh_from_db()
+        self.assertTrue(movimiento.activo)
+        self.assertEqual(MovimientoAnimal.objects.filter(animal=self.animal).count(), 1)
+
+    def test_operador_no_puede_cambiar_potrero(self):
+        movimiento = MovimientoAnimal.objects.create(
+            animal=self.animal, potrero=self.potrero,
+            fecha_entrada=timezone.make_aware(timezone.datetime(2026, 8, 21, 10, 0)),
+            activo=True,
+        )
+        self.client.force_login(self.operador)
+        self._activar_finca(self.finca)
+        response = self.client.get(reverse("ganado:cambiar_potrero", args=[movimiento.id]))
+        self.assertEqual(response.status_code, 403)
 
     def test_cerrar_movimiento_registra_salida(self):
         movimiento = MovimientoAnimal.objects.create(
