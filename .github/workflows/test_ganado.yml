@@ -56,6 +56,9 @@ jobs:
           python-version: "3.13"
           cache: pip
 
+      - name: Install GDAL for GeoDjango
+        run: sudo apt-get update && sudo apt-get install -y gdal-bin libgdal-dev
+
       - name: Install dependencies
         run: pip install -r requirements.txt
 
