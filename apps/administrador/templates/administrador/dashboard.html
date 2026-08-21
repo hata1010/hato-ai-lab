@@ -26,86 +26,37 @@
 
     {% if finca %}
     <section class="v2-context">
-        <div>
-            <span class="context-label">FINCA</span>
-            <strong>{{ finca.nombre }}</strong>
-        </div>
-        <div>
-            <span class="context-label">CORTE</span>
-            <strong>{{ now|date:"d/m/Y H:i" }}</strong>
-        </div>
-        <div>
-            <span class="context-label">UBICACIÓN</span>
-            <strong>{% if ubicacion_finca %}{{ ubicacion_finca.lat|floatformat:5 }}, {{ ubicacion_finca.lon|floatformat:5 }}{% else %}No registrada{% endif %}</strong>
-        </div>
-        <div>
-            <span class="context-label">MÉTRICAS ACTIVAS</span>
-            <strong>{{ total_metricas }}</strong>
-        </div>
+        <div><span class="context-label">FINCA</span><strong>{{ finca.nombre }}</strong></div>
+        <div><span class="context-label">CORTE</span><strong>{{ corte|date:"d/m/Y H:i" }}</strong></div>
+        <div><span class="context-label">UBICACIÓN</span><strong>{% if ubicacion_finca %}{{ ubicacion_finca.lat|floatformat:5 }}, {{ ubicacion_finca.lon|floatformat:5 }}{% else %}No registrada{% endif %}</strong></div>
+        <div><span class="context-label">MÉTRICAS ACTIVAS</span><strong>{{ total_metricas }}</strong></div>
     </section>
 
     <section class="v2-kpis">
-        <article class="v2-kpi" data-tooltip="Animales con estado activo pertenecientes a la finca seleccionada. Fuente: Animal.estado + Animal.finca.">
-            <span>HATO ACTIVO</span>
-            <strong>{{ total_animales }}</strong>
-            <small>animales · fuente Animal</small>
-        </article>
-        <article class="v2-kpi" data-tooltip="Porcentaje de animales activos cuyo sexo registrado es Hembra. Fuente: Animal.sexo + Animal.finca.">
-            <span>HEMBRAS</span>
-            <strong>{{ hembras_pct }}%</strong>
-            <small>del hato activo</small>
-        </article>
-        <article class="v2-kpi" data-tooltip="Promedio del último pesaje disponible por animal activo. Fuente: PesajeAnimal.fecha/peso_kg.">
-            <span>PESO PROMEDIO</span>
-            <strong>{% if peso_promedio %}{{ peso_promedio }}{% else %}—{% endif %}</strong>
-            <small>kg · {{ animales_con_peso }} con pesaje</small>
-        </article>
-        <article class="v2-kpi" data-tooltip="Carga estimada como peso vivo total / 450 kg UGG / hectáreas de potreros activos. No se calcula si falta peso o superficie.">
-            <span>CARGA UGG/HA</span>
-            <strong>{% if carga_ugg_ha %}{{ carga_ugg_ha }}{% else %}—{% endif %}</strong>
-            <small>derivada de datos disponibles</small>
-        </article>
-        <article class="v2-kpi" data-tooltip="Suma del área_hectareas de los potreros activos de la finca.">
-            <span>SUPERFICIE</span>
-            <strong>{{ total_hectareas|floatformat:2 }}</strong>
-            <small>hectáreas de pastoreo</small>
-        </article>
-        <article class="v2-kpi" data-tooltip="Cantidad de métricas activas propias de la finca más métricas globales activas. Fuente: Metrica.">
-            <span>MOTOR</span>
-            <strong>{{ total_metricas }}</strong>
-            <small>métricas disponibles</small>
-        </article>
+        <article class="v2-kpi" data-tooltip="Animales con estado activo pertenecientes a la finca seleccionada. Fuente: Animal.estado + Animal.finca."><span>HATO ACTIVO</span><strong>{{ total_animales }}</strong><small>animales · fuente Animal</small></article>
+        <article class="v2-kpi" data-tooltip="Porcentaje de animales activos cuyo sexo registrado es Hembra. Fuente: Animal.sexo + Animal.finca."><span>HEMBRAS</span><strong>{{ hembras_pct }}%</strong><small>del hato activo</small></article>
+        <article class="v2-kpi" data-tooltip="Promedio del último pesaje disponible por animal activo. Fuente: PesajeAnimal.fecha/peso_kg."><span>PESO PROMEDIO</span><strong>{% if peso_promedio %}{{ peso_promedio }}{% else %}—{% endif %}</strong><small>kg · {{ animales_con_peso }} con pesaje</small></article>
+        <article class="v2-kpi" data-tooltip="Carga estimada como peso vivo total / 450 kg UGG / hectáreas de potreros activos. No se calcula si falta peso o superficie."><span>CARGA UGG/HA</span><strong>{% if carga_ugg_ha %}{{ carga_ugg_ha }}{% else %}—{% endif %}</strong><small>derivada de datos disponibles</small></article>
+        <article class="v2-kpi" data-tooltip="Suma del área_hectareas de los potreros activos de la finca."><span>SUPERFICIE</span><strong>{{ total_hectareas|floatformat:2 }}</strong><small>hectáreas de pastoreo</small></article>
+        <article class="v2-kpi" data-tooltip="Cantidad de métricas activas propias de la finca más métricas globales activas. Fuente: Metrica."><span>MOTOR</span><strong>{{ total_metricas }}</strong><small>métricas disponibles</small></article>
     </section>
 
     <div class="v2-grid two">
         <section class="v2-panel">
-            <div class="v2-panel-head">
-                <div><span class="eyebrow">EVOLUCIÓN</span><h2>Registros de animales · 14 meses</h2></div>
-                <span class="source-chip">Animal.created_at</span>
-            </div>
+            <div class="v2-panel-head"><div><span class="eyebrow">EVOLUCIÓN</span><h2>Registros de animales · 14 meses</h2></div><span class="source-chip">Animal.created_at</span></div>
             <div class="v2-bars" aria-label="Registros de animales por mes">
                 {% for item in registros_14_meses %}
-                <div class="v2-bar-wrap" data-tooltip="{{ item.label }} · {{ item.total }} registros creados en la finca activa. Fuente: Animal.created_at.">
-                    <div class="v2-bar" style="height:{% if item.total %}{{ item.total }}0{% else %}4{% endif %}px; max-height:150px;"></div>
-                    <strong>{{ item.total }}</strong>
-                    <small>{{ item.label }}</small>
-                </div>
+                <div class="v2-bar-wrap" data-tooltip="{{ item.label }} · {{ item.total }} registros creados en la finca activa. Fuente: Animal.created_at."><div class="v2-bar" style="height:{% if item.total %}{{ item.total }}0{% else %}4{% endif %}px; max-height:150px;"></div><strong>{{ item.total }}</strong><small>{{ item.label }}</small></div>
                 {% empty %}<p class="empty">Sin registros en el período.</p>{% endfor %}
             </div>
             <p class="v2-note">La gráfica muestra únicamente registros existentes. No interpreta registros como nacimientos, compras o bajas si la fuente histórica no lo permite.</p>
         </section>
 
         <section class="v2-panel">
-            <div class="v2-panel-head">
-                <div><span class="eyebrow">ESTRUCTURA</span><h2>Categorías del hato</h2></div>
-                <span class="source-chip">Animal.categoria</span>
-            </div>
+            <div class="v2-panel-head"><div><span class="eyebrow">ESTRUCTURA</span><h2>Categorías del hato</h2></div><span class="source-chip">Animal.categoria</span></div>
             <div class="v2-list-chart">
                 {% for item in categorias %}
-                <div class="chart-row" data-tooltip="{{ item.nombre }} · {{ item.total }} animales activos. Fuente: Animal.categoria.">
-                    <div class="row-label"><span>{{ item.nombre }}</span><strong>{{ item.total }}</strong></div>
-                    <div class="track"><div class="fill" style="width:{% widthratio item.total total_animales 100 %}%"></div></div>
-                </div>
+                <div class="chart-row" data-tooltip="{{ item.nombre }} · {{ item.total }} animales activos. Fuente: Animal.categoria."><div class="row-label"><span>{{ item.nombre }}</span><strong>{{ item.total }}</strong></div><div class="track"><div class="fill" style="width:{% widthratio item.total total_animales 100 %}%"></div></div></div>
                 {% empty %}<p class="empty">No hay categorías registradas.</p>{% endfor %}
             </div>
         </section>
@@ -113,34 +64,20 @@
 
     <div class="v2-grid two">
         <section class="v2-panel">
-            <div class="v2-panel-head">
-                <div><span class="eyebrow">PASTOREO</span><h2>Ocupación por potrero</h2></div>
-                {% if finca %}<a class="v2-link" href="{% url 'mapa_finca' finca.id %}">Abrir mapa GIS →</a>{% endif %}
-            </div>
+            <div class="v2-panel-head"><div><span class="eyebrow">PASTOREO</span><h2>Ocupación por potrero</h2></div>{% if finca %}<a class="v2-link" href="{% url 'mapa_finca' finca.id %}">Abrir mapa GIS →</a>{% endif %}</div>
             <div class="potrero-table">
                 <div class="potrero-row table-head"><span>Potrero</span><span>Estado</span><span>Uso</span><span>Área</span></div>
                 {% for potrero in potreros_operativos %}
-                <div class="potrero-row" data-tooltip="{{ potrero.nombre }} · {{ potrero.carga }}/{{ potrero.capacidad|default:'—' }} animales · {{ potrero.pasto }} · {% if potrero.tiene_poligono %}polígono GIS registrado{% else %}sin polígono GIS{% endif %}.">
-                    <span><strong>{{ potrero.codigo }}</strong> {{ potrero.nombre }}</span>
-                    <span class="status status-{{ potrero.estado_codigo }}">{{ potrero.estado }}</span>
-                    <span>{% if potrero.utilizacion != None %}{{ potrero.utilizacion }}%{% else %}—{% endif %}</span>
-                    <span>{% if potrero.area %}{{ potrero.area|floatformat:2 }} ha{% else %}—{% endif %}</span>
-                </div>
+                <div class="potrero-row" data-tooltip="{{ potrero.nombre }} · {{ potrero.carga }}/{{ potrero.capacidad|default:'—' }} animales · {{ potrero.pasto }} · {% if potrero.tiene_poligono %}polígono GIS registrado{% else %}sin polígono GIS{% endif %}."><span><strong>{{ potrero.codigo }}</strong> {{ potrero.nombre }}</span><span class="status status-{{ potrero.estado_codigo }}">{{ potrero.estado }}</span><span>{% if potrero.utilizacion != None %}{{ potrero.utilizacion }}%{% else %}—{% endif %}</span><span>{% if potrero.area %}{{ potrero.area|floatformat:2 }} ha{% else %}—{% endif %}</span></div>
                 {% empty %}<p class="empty">No hay potreros activos.</p>{% endfor %}
             </div>
         </section>
 
         <section class="v2-panel">
-            <div class="v2-panel-head">
-                <div><span class="eyebrow">BASE GENÉTICA</span><h2>Distribución racial</h2></div>
-                <span class="source-chip">ComposicionGenetica</span>
-            </div>
+            <div class="v2-panel-head"><div><span class="eyebrow">BASE GENÉTICA</span><h2>Distribución racial</h2></div><span class="source-chip">ComposicionGenetica</span></div>
             <div class="v2-list-chart">
                 {% for item in genetica %}
-                <div class="chart-row" data-tooltip="{{ item.nombre }} · {{ item.total|floatformat:2 }}% acumulado en composiciones registradas. Fuente: ComposicionGenetica.">
-                    <div class="row-label"><span>{{ item.nombre }}</span><strong>{{ item.total|floatformat:1 }}%</strong></div>
-                    <div class="track"><div class="fill genetic" style="width:{% if item.total > 100 %}100{% else %}{{ item.total }}{% endif %}%"></div></div>
-                </div>
+                <div class="chart-row" data-tooltip="{{ item.nombre }} · {{ item.total|floatformat:2 }}% acumulado en composiciones registradas. Fuente: ComposicionGenetica."><div class="row-label"><span>{{ item.nombre }}</span><strong>{{ item.total|floatformat:1 }}%</strong></div><div class="track"><div class="fill genetic" style="width:{% if item.total > 100 %}100{% else %}{{ item.total }}{% endif %}%"></div></div></div>
                 {% empty %}<p class="empty">No hay composición genética registrada.</p>{% endfor %}
             </div>
         </section>
@@ -148,16 +85,10 @@
 
     <div class="v2-grid two">
         <section class="v2-panel">
-            <div class="v2-panel-head">
-                <div><span class="eyebrow">ACTIVIDAD</span><h2>Últimos pesajes</h2></div>
-                <span class="source-chip">PesajeAnimal</span>
-            </div>
+            <div class="v2-panel-head"><div><span class="eyebrow">ACTIVIDAD</span><h2>Últimos pesajes</h2></div><span class="source-chip">PesajeAnimal</span></div>
             <div class="activity-v2">
                 {% for item in actividad %}
-                <div class="activity-v2-item" data-tooltip="{{ item.tipo }} · {{ item.origen }} · {{ item.fecha|date:'d/m/Y H:i' }}.">
-                    <span class="activity-icon">{{ item.icono }}</span>
-                    <div><strong>{{ item.titulo }}</strong><small>{{ item.fecha|date:"d/m/Y H:i" }} · {{ item.origen }}</small></div>
-                </div>
+                <div class="activity-v2-item" data-tooltip="{{ item.tipo }} · {{ item.origen }} · {{ item.fecha|date:'d/m/Y H:i' }}."><span class="activity-icon">{{ item.icono }}</span><div><strong>{{ item.titulo }}</strong><small>{{ item.fecha|date:"d/m/Y H:i" }} · {{ item.origen }}</small></div></div>
                 {% empty %}<p class="empty">No hay pesajes registrados para esta finca.</p>{% endfor %}
             </div>
         </section>
