@@ -20,6 +20,11 @@ urlpatterns = [
         name="seleccionar_finca",
     ),
     path(
+        "finca/mapa/",
+        core_views.mapa_finca,
+        name="mapa_finca_activa",
+    ),
+    path(
         "finca/<int:finca_id>/mapa/",
         core_views.mapa_finca,
         name="mapa_finca",

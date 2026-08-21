@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.exceptions import PermissionDenied
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods
 from .models import Finca, Potrero
 from apps.ganado.models import Animal, MovimientoAnimal
 from apps.core.tenant import (
@@ -106,9 +106,21 @@ def animales_por_potrero(request, potrero_id):
     return render(request, 'core/animales_por_potrero.html', context)
 
 
-@require_POST
+@require_http_methods(["GET", "POST"])
 def seleccionar_finca(request):
-    """Vista controlada para cambio de finca activa mediante POST."""
+    """Pantalla de selección de finca y cambio seguro de finca activa."""
+    if request.method == "GET":
+        fincas = obtener_fincas_usuario(request.user)
+        finca_activa = obtener_finca_activa(request)
+        return render(
+            request,
+            "core/seleccionar_finca.html",
+            {
+                "fincas": fincas,
+                "finca_activa": finca_activa,
+            },
+        )
+
     finca_id = request.POST.get("finca_id")
     cambiar_finca_activa(request, finca_id)
     next_url = request.POST.get("next") or request.META.get("HTTP_REFERER") or "/"
