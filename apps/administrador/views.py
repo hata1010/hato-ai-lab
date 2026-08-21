@@ -139,6 +139,7 @@ def dashboard(request):
         "titulo": "Panel Operativo V2 — Hato AI Lab",
         "finca": finca,
         "fincas_disponibles": fincas_usuario,
+        "corte": timezone.localtime(),
         "total_animales": total_animales,
         "total_potreros": total_potreros,
         "total_hectareas": total_hectareas,
