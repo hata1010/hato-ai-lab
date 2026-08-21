@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{ potrero.nombre }} · Potreros</title>
+<style>body{font-family:system-ui,sans-serif;background:#f5f7fa;margin:0;color:#24303a}.wrap{max-width:900px;margin:30px auto;padding:0 20px}.card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 10px #00000012}dl{display:grid;grid-template-columns:220px 1fr;gap:10px}dt{font-weight:700;color:#475569}dd{margin:0}.btn{display:inline-block;padding:9px 13px;border-radius:7px;background:#1769aa;color:#fff;text-decoration:none}.secondary{background:#eef2f7;color:#24303a}.danger{background:#b91c1c;border:0;color:#fff;padding:9px 13px;border-radius:7px;font-weight:700}.actions{display:flex;gap:10px;align-items:center;margin-top:20px}</style>
+</head><body><div class="wrap"><div class="card">
+<h1>🌱 {{ potrero.nombre }}</h1><p>{{ finca.nombre }} · Código: <strong>{{ potrero.codigo }}</strong></p>
+<dl>
+<dt>Tipo</dt><dd>{{ potrero.get_tipo_display }}</dd><dt>Área</dt><dd>{% if potrero.area_hectareas %}{{ potrero.area_hectareas }} ha{% else %}No definida{% endif %}</dd>
+<dt>Capacidad</dt><dd>{% if potrero.capacidad_animales %}{{ potrero.capacidad_animales }} animales{% else %}No definida{% endif %}</dd><dt>Carga actual</dt><dd>{{ potrero.carga_actual }}</dd>
+<dt>Tipo de pasto</dt><dd>{{ potrero.tipo_pasto|default:"No definido" }}</dd><dt>Calidad del pasto</dt><dd>{{ potrero.get_calidad_pasto_display }}</dd>
+<dt>Estado</dt><dd>{{ potrero.get_estado_display }}</dd><dt>Días de descanso</dt><dd>{{ potrero.dias_descanso }}</dd>
+<dt>Último pastoreo</dt><dd>{{ potrero.fecha_ultimo_pastoreo|default:"No registrado" }}</dd><dt>Ubicación</dt><dd>{{ potrero.ubicacion|default:"No definida" }}</dd>
+<dt>Polígono</dt><dd>{% if potrero.poligono %}Definido{% else %}No definido{% endif %}</dd><dt>Activo</dt><dd>{{ potrero.is_active|yesno:"Sí,No" }}</dd>
+</dl>
+{% if potrero.descripcion %}<hr><h3>Descripción</h3><p>{{ potrero.descripcion }}</p>{% endif %}
+<div class="actions"><a class="btn secondary" href="{% url 'potreros:lista' %}">← Potreros</a>{% if puede_gestionar %}<a class="btn" href="{% url 'potreros:editar' potrero.id %}">✏️ Editar</a><form method="post" action="{% url 'potreros:eliminar' potrero.id %}" onsubmit="return confirm('¿Eliminar este potrero? Esta acción no se puede deshacer.');">{% csrf_token %}<button class="danger" type="submit">Eliminar</button></form>{% endif %}<a class="btn secondary" href="{% url 'mapa_finca_activa' %}">🗺️ Mapa</a></div>
+</div></div></body></html>
