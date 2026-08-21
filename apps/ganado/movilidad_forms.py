@@ -38,3 +38,34 @@ class MovimientoAnimalForm(forms.ModelForm):
             if animal is not None and MovimientoAnimal.objects.filter(animal=animal, activo=True).exclude(pk=self.instance.pk).exists():
                 self.add_error("animal", "El animal ya tiene un movimiento activo. Debe cerrarse antes de registrarlo en otro potrero.")
         return cleaned
+
+
+class CambioPotreroForm(forms.Form):
+    potrero = forms.ModelChoiceField(queryset=Potrero.objects.none(), label="Nuevo potrero")
+    fecha_entrada = forms.DateTimeField(
+        label="Fecha y hora del cambio",
+        input_formats=["%Y-%m-%dT%H:%M"],
+        widget=forms.DateTimeInput(format="%Y-%m-%dT%H:%M", attrs={"type": "datetime-local"}),
+    )
+    observaciones = forms.CharField(
+        label="Observaciones",
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 3}),
+    )
+
+    def __init__(self, *args, finca=None, potrero_actual=None, **kwargs):
+        self.finca = finca
+        self.potrero_actual = potrero_actual
+        super().__init__(*args, **kwargs)
+        self.fields["potrero"].queryset = (
+            Potrero.objects.filter(finca=finca, is_active=True).order_by("nombre")
+            if finca is not None else Potrero.objects.none()
+        )
+
+    def clean_potrero(self):
+        potrero = self.cleaned_data["potrero"]
+        if self.finca is not None and potrero.finca_id != self.finca.id:
+            raise forms.ValidationError("El nuevo potrero debe pertenecer a la finca activa.")
+        if self.potrero_actual is not None and potrero.pk == self.potrero_actual.pk:
+            raise forms.ValidationError("El nuevo potrero debe ser diferente al potrero actual.")
+        return potrero
