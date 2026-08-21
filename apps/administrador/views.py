@@ -2,7 +2,7 @@ from collections import OrderedDict
 from datetime import timedelta
 from decimal import Decimal
 
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Prefetch, Q, Sum
 from django.shortcuts import render
 from django.utils import timezone
 
@@ -13,8 +13,8 @@ from apps.produccion.models import Metrica
 
 
 def _latest_weight(animal):
-    pesaje = animal.pesajes.order_by("-fecha").first()
-    return pesaje.peso_kg if pesaje else None
+    pesajes = getattr(animal, "_dashboard_pesajes", [])
+    return pesajes[0].peso_kg if pesajes else None
 
 
 def dashboard(request):
@@ -38,7 +38,12 @@ def dashboard(request):
     ubicacion_finca = None
 
     if finca:
-        animales_qs = Animal.objects.filter(finca=finca, estado="activo")
+        latest_pesajes = Prefetch(
+            "pesajes",
+            queryset=PesajeAnimal.objects.order_by("-fecha"),
+            to_attr="_dashboard_pesajes",
+        )
+        animales_qs = Animal.objects.filter(finca=finca, estado="activo").prefetch_related(latest_pesajes)
         total_animales = animales_qs.count()
 
         hembras = animales_qs.filter(sexo="H").count()
@@ -46,7 +51,7 @@ def dashboard(request):
             hembras_pct = (Decimal(hembras) * Decimal("100") / Decimal(total_animales)).quantize(Decimal("0.1"))
 
         pesos = []
-        for animal in animales_qs.prefetch_related("pesajes"):
+        for animal in animales_qs:
             peso = _latest_weight(animal)
             if peso is not None:
                 pesos.append(Decimal(peso))
@@ -94,13 +99,21 @@ def dashboard(request):
             for item in animales_qs.values("categoria").annotate(total=Count("id")).order_by("-total")
         ]
 
-        genetica = [
-            {"nombre": item["raza__nombre"], "total": item["total"]}
-            for item in ComposicionGenetica.objects.filter(animal__finca=finca)
+        genetica_qs = list(
+            ComposicionGenetica.objects.filter(animal__finca=finca)
             .values("raza__nombre")
             .annotate(total=Sum("porcentaje"))
             .order_by("-total")[:8]
-        ]
+        )
+        total_genetica = sum((Decimal(item["total"]) for item in genetica_qs), Decimal("0"))
+        if total_genetica:
+            genetica = [
+                {
+                    "nombre": item["raza__nombre"],
+                    "total": (Decimal(item["total"]) * Decimal("100") / total_genetica).quantize(Decimal("0.1")),
+                }
+                for item in genetica_qs
+            ]
 
         now = timezone.now()
         start = (now.replace(day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(days=395)).replace(day=1)
