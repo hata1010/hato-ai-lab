@@ -1,0 +1,31 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Historial de pesajes · Hato{% endblock %}
+
+{% block content %}
+<h1>⚖️ Historial de pesajes</h1>
+<p><strong>Animal:</strong> {{ animal }}</p>
+<p><strong>Finca:</strong> {{ finca.nombre }}</p>
+
+{% if puede_gestionar %}
+<p><a href="{% url 'ganado:crear_pesaje' %}?animal={{ animal.id }}">➕ Registrar pesaje</a></p>
+{% endif %}
+
+<table>
+    <thead><tr><th>Fecha</th><th>Peso (kg)</th><th>Observaciones</th><th></th></tr></thead>
+    <tbody>
+    {% for pesaje in pesajes %}
+        <tr>
+            <td>{{ pesaje.fecha|date:"d/m/Y H:i" }}</td>
+            <td>{{ pesaje.peso_kg }}</td>
+            <td>{{ pesaje.observaciones|default:"—" }}</td>
+            <td>{% if puede_gestionar %}<a href="{% url 'ganado:editar_pesaje' pesaje.id %}">Editar</a>{% endif %}</td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="4">No hay pesajes registrados para este animal.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<p><a href="{% url 'ganado:detalle_animal' animal.id %}">← Volver a la ficha del animal</a></p>
+{% endblock %}
