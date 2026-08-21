@@ -1,0 +1,21 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Registrar movimiento · Hato{% endblock %}
+
+{% block content %}
+<h1>🔄 Registrar movimiento</h1>
+<p><strong>Finca:</strong> {{ finca.nombre }}</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+    <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+        {% for error in field.errors %}<br><strong>{{ error }}</strong>{% endfor %}
+    </p>
+    {% endfor %}
+    <button type="submit">💾 Registrar movimiento</button>
+    <a href="{% url 'ganado:lista_movilidad' %}">Cancelar</a>
+</form>
+{% endblock %}
