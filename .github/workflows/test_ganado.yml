@@ -1,0 +1,69 @@
+name: Django Ganado Tests
+
+on:
+  push:
+    paths:
+      - "apps/ganado/**"
+      - "apps/core/**"
+      - "config/**"
+      - "requirements.txt"
+      - ".github/workflows/test_ganado.yml"
+  pull_request:
+    paths:
+      - "apps/ganado/**"
+      - "apps/core/**"
+      - "config/**"
+      - "requirements.txt"
+      - ".github/workflows/test_ganado.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgis:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: hato_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hato_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_NAME: hato_test
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DJANGO_SECRET_KEY: ci-test-secret
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Django system check
+        run: python manage.py check
+
+      - name: Apply migrations
+        run: python manage.py migrate --noinput
+
+      - name: Run Ganado tests
+        run: python manage.py test apps.ganado --verbosity 2
