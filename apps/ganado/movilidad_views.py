@@ -1,13 +1,14 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from apps.core.tenant import obtener_finca_activa, obtener_rol_usuario_finca, verificar_acceso_finca
 
 from .models import Animal, MovimientoAnimal
-from .movilidad_forms import MovimientoAnimalForm
+from .movilidad_forms import CambioPotreroForm, MovimientoAnimalForm
 
 
 ROLES_GESTION_MOVILIDAD = {"superusuario", "propietario", "administrador"}
@@ -87,6 +88,52 @@ def crear_movimiento(request):
         return redirect("ganado:detalle_animal", animal_id=movimiento.animal_id)
     return render(request, "ganado/movilidad_form.html", {
         "finca": finca, "form": form, "modo": "crear",
+        "rol": obtener_rol_usuario_finca(request.user, finca),
+    })
+
+
+@login_required
+def cambiar_potrero(request, movimiento_id):
+    finca = _finca_activa_o_denegar(request)
+    if not _puede_gestionar(request, finca):
+        raise PermissionDenied("Tu rol no permite cambiar el potrero del ganado.")
+
+    movimiento = get_object_or_404(
+        MovimientoAnimal.objects.select_related("animal", "potrero"),
+        id=movimiento_id,
+        animal__finca=finca,
+        activo=True,
+    )
+    form = CambioPotreroForm(
+        request.POST or None,
+        finca=finca,
+        potrero_actual=movimiento.potrero,
+        initial={"fecha_entrada": timezone.localtime().strftime("%Y-%m-%dT%H:%M")},
+    )
+
+    if request.method == "POST" and form.is_valid():
+        fecha_cambio = form.cleaned_data["fecha_entrada"]
+        if fecha_cambio < movimiento.fecha_entrada:
+            form.add_error("fecha_entrada", "La fecha del cambio no puede ser anterior a la entrada actual.")
+        else:
+            with transaction.atomic():
+                movimiento.fecha_salida = fecha_cambio
+                movimiento.activo = False
+                movimiento.save(update_fields=["fecha_salida", "activo"])
+                MovimientoAnimal.objects.create(
+                    animal=movimiento.animal,
+                    potrero=form.cleaned_data["potrero"],
+                    fecha_entrada=fecha_cambio,
+                    activo=True,
+                    observaciones=form.cleaned_data["observaciones"],
+                )
+            messages.success(request, "Cambio de potrero registrado y movimiento anterior cerrado correctamente.")
+            return redirect("ganado:historial_movilidad_animal", animal_id=movimiento.animal_id)
+
+    return render(request, "ganado/cambio_potrero_form.html", {
+        "finca": finca,
+        "movimiento": movimiento,
+        "form": form,
         "rol": obtener_rol_usuario_finca(request.user, finca),
     })
 
