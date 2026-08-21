@@ -1,0 +1,24 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Cambio de potrero · Hato{% endblock %}
+
+{% block content %}
+<h1>🔀 Cambio de potrero</h1>
+<p><strong>Animal:</strong> {{ movimiento.animal }}</p>
+<p><strong>Finca:</strong> {{ finca.nombre }} · <strong>Potrero actual:</strong> {{ movimiento.potrero }}</p>
+<p>El movimiento actual se cerrará con la fecha del cambio y se creará el nuevo movimiento. El historial conservará ambos registros.</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+    <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+        {% for error in field.errors %}<br><strong>{{ error }}</strong>{% endfor %}
+    </p>
+    {% endfor %}
+    <button type="submit">🔀 Confirmar cambio de potrero</button>
+    <a href="{% url 'ganado:historial_movilidad_animal' movimiento.animal_id %}">Cancelar</a>
+</form>
+{% endblock %}
