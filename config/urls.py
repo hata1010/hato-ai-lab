@@ -35,6 +35,9 @@ urlpatterns = [
         name="animales_por_potrero",
     ),
 
+    # MÓDULOS OPERATIVOS
+    path("potreros/", include("apps.core.urls")),
+
     # MÓDULOS DE APLICACIONES
     path("administrador/", include("apps.administrador.urls")),
     path("produccion/", include("apps.produccion.urls")),
