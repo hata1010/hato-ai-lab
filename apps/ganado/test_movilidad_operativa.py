@@ -36,7 +36,24 @@ class MovilidadOperativaTests(TestCase):
         self._activar_finca(self.finca)
         response = self.client.get(reverse("ganado:lista_movilidad"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Movilidad del ganado")
+        self.assertContains(response, "Rotación de potreros")
+        self.assertContains(response, "Potrero 1")
+        self.assertContains(response, "Potrero 2")
+
+    def test_tablero_muestra_animal_en_su_potrero_actual(self):
+        MovimientoAnimal.objects.create(
+            animal=self.animal,
+            potrero=self.potrero,
+            fecha_entrada=timezone.make_aware(timezone.datetime(2026, 8, 21, 10, 0)),
+            activo=True,
+        )
+        self.client.force_login(self.admin)
+        self._activar_finca(self.finca)
+        response = self.client.get(reverse("ganado:lista_movilidad"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "MOV-001")
+        self.assertContains(response, 'data-current-potrero="%s"' % self.potrero.id)
+        self.assertContains(response, "Potrero 1")
 
     def test_administrador_puede_crear_movimiento(self):
         self.client.force_login(self.admin)
