@@ -126,6 +126,24 @@ class MovilidadOperativaTests(TestCase):
         self.assertEqual(nuevo.observaciones, "Cambio por rotación de pastoreo")
         self.assertEqual(MovimientoAnimal.objects.filter(animal=self.animal).count(), 2)
 
+    def test_cambio_desde_tablero_regresa_al_tablero(self):
+        movimiento = MovimientoAnimal.objects.create(
+            animal=self.animal, potrero=self.potrero,
+            fecha_entrada=timezone.make_aware(timezone.datetime(2026, 8, 21, 10, 0)),
+            activo=True,
+        )
+        self.client.force_login(self.admin)
+        self._activar_finca(self.finca)
+        response = self.client.post(reverse("ganado:cambiar_potrero", args=[movimiento.id]), {
+            "potrero": self.potrero_2.id,
+            "fecha_entrada": "2026-08-21T12:00",
+            "observaciones": "Traslado desde tablero",
+            "next": "tablero",
+        })
+        self.assertRedirects(response, reverse("ganado:lista_movilidad"))
+        nuevo = MovimientoAnimal.objects.get(animal=self.animal, activo=True)
+        self.assertEqual(nuevo.potrero_id, self.potrero_2.id)
+
     def test_cambio_al_mismo_potrero_no_se_permite(self):
         movimiento = MovimientoAnimal.objects.create(
             animal=self.animal, potrero=self.potrero,
