@@ -26,6 +26,15 @@ def _puede_gestionar(request, finca):
     return obtener_rol_usuario_finca(request.user, finca) in ROLES_GESTION_MOVILIDAD
 
 
+def _ultimos_pesos(animal_ids):
+    pesos = {}
+    if not animal_ids:
+        return pesos
+    for pesaje in PesajeAnimal.objects.filter(animal_id__in=animal_ids).order_by("animal_id", "-fecha"):
+        pesos.setdefault(pesaje.animal_id, pesaje.peso_kg)
+    return pesos
+
+
 def _datos_tablero_movilidad(finca):
     """Construye la representación operacional del tablero sin alterar modelos."""
     potreros = list(
@@ -38,13 +47,10 @@ def _datos_tablero_movilidad(finca):
     )
 
     animal_ids = [movimiento.animal_id for movimiento in movimientos_activos]
-    pesos = {}
-    if animal_ids:
-        for pesaje in PesajeAnimal.objects.filter(animal_id__in=animal_ids).order_by("animal_id", "-fecha"):
-            pesos.setdefault(pesaje.animal_id, pesaje.peso_kg)
-
+    pesos = _ultimos_pesos(animal_ids)
     por_potrero = {potrero.id: [] for potrero in potreros}
     ubicados = set()
+
     for movimiento in movimientos_activos:
         movimiento.animal.ultimo_peso = pesos.get(movimiento.animal_id)
         if movimiento.potrero_id in por_potrero:
@@ -70,16 +76,9 @@ def _datos_tablero_movilidad(finca):
         .exclude(id__in=ubicados)
         .order_by("numero_arete")
     )
-    if sin_ubicacion:
-        sin_ids = [animal.id for animal in sin_ubicacion]
-        for pesaje in PesajeAnimal.objects.filter(animal_id__in=sin_ids).order_by("animal_id", "-fecha"):
-            if not hasattr(pesaje.animal if hasattr(pesaje, "animal") else None, "ultimo_peso"):
-                pass
-        sin_pesos = {}
-        for pesaje in PesajeAnimal.objects.filter(animal_id__in=sin_ids).order_by("animal_id", "-fecha"):
-            sin_pesos.setdefault(pesaje.animal_id, pesaje.peso_kg)
-        for animal in sin_ubicacion:
-            animal.ultimo_peso = sin_pesos.get(animal.id)
+    sin_pesos = _ultimos_pesos([animal.id for animal in sin_ubicacion])
+    for animal in sin_ubicacion:
+        animal.ultimo_peso = sin_pesos.get(animal.id)
 
     return tarjetas, sin_ubicacion
 
