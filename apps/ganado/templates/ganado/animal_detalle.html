@@ -27,8 +27,11 @@
 </section>
 
 <section>
-<h2>🔄 Movilidad</h2>
-{% if movimientos %}<table><tr><th>Potrero</th><th>Entrada</th><th>Salida</th><th>Activo</th></tr>{% for m in movimientos %}<tr><td>{{ m.potrero }}</td><td>{{ m.fecha_entrada }}</td><td>{{ m.fecha_salida|default:"—" }}</td><td>{{ m.activo|yesno:"Sí,No" }}</td></tr>{% endfor %}</table>{% else %}<p>Sin movimientos registrados.</p>{% endif %}
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <h2>🔄 Movilidad</h2>
+    <div><a href="{% url 'ganado:historial_movilidad_animal' animal.id %}">Ver historial completo</a>{% if puede_gestionar %} · <a href="{% url 'ganado:crear_movimiento' %}?animal={{ animal.id }}">➕ Registrar entrada / cambio</a>{% endif %}</div>
+</div>
+{% if movimientos %}<table><tr><th>Potrero</th><th>Entrada</th><th>Salida</th><th>Estado</th></tr>{% for m in movimientos|slice:":5" %}<tr><td>{{ m.potrero }}</td><td>{{ m.fecha_entrada }}</td><td>{{ m.fecha_salida|default:"—" }}</td><td>{% if m.activo %}🟢 Activo{% else %}⚪ Cerrado{% endif %}</td></tr>{% endfor %}</table>{% else %}<p>Sin movimientos registrados.</p>{% endif %}
 </section>
 
 <section>

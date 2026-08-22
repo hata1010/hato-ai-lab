@@ -8,18 +8,38 @@
     <title>{% block title %}Hato{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'administrador/css/dashboard.css' %}">
 </head>
-<body>
+<body data-theme="noche">
 <header class="topbar">
     <div class="brand">🐄 Hato</div>
     <div class="user-area">
         {% if user.is_authenticated %}
             <span>{{ user.username }}</span>
             {% if user.is_superuser %}
-                <span class="badge" style="background:#6d28d9;color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;margin-left:5px;font-weight:800;">ROOT</span>
+                <span class="badge" style="background:var(--hato-primary-strong);color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;margin-left:5px;font-weight:800;">ROOT</span>
             {% endif %}
         {% else %}
             <span>Hato AI Lab</span>
         {% endif %}
+        <details class="theme-picker">
+            <summary>🎨 Apariencia</summary>
+            <div class="theme-picker-panel">
+                <strong>Elige la apariencia de Hato</strong>
+                <div class="theme-options">
+                    <button class="theme-option" type="button" data-theme-choice="rocio">
+                        <span class="theme-swatch swatch-rocio"></span>🌿 Rocío de Mañana
+                    </button>
+                    <button class="theme-option" type="button" data-theme-choice="lavanda">
+                        <span class="theme-swatch swatch-lavanda"></span>🪻 Llanura Lavanda
+                    </button>
+                    <button class="theme-option" type="button" data-theme-choice="alborada">
+                        <span class="theme-swatch swatch-alborada"></span>🌅 Alborada Rosa
+                    </button>
+                    <button class="theme-option" type="button" data-theme-choice="noche">
+                        <span class="theme-swatch swatch-noche"></span>🌌 Noche Llanera
+                    </button>
+                </div>
+            </div>
+        </details>
     </div>
 </header>
 
@@ -34,6 +54,7 @@
 
             <div class="menu-section">🐄 GANADO</div>
             <a href="{% url 'ganado:lista_animales' %}">🐄 Animales</a>
+            <a href="{% url 'ganado:lista_movilidad' %}">🔄 Movilidad del ganado</a>
             <a href="{% url 'ganado:lista_salud' %}">🩺 Salud / Historia clínica</a>
 
             <div class="menu-section">📊 PRODUCCIÓN</div>
@@ -43,7 +64,7 @@
 
             {% if user.is_superuser %}
             <div class="menu-section">🌐 GLOBAL</div>
-            <a href="{% url 'produccion:metricas_globales_lista' %}" style="background:rgba(109,40,217,0.10);color:#6d28d9;font-weight:800;border-left:3px solid #6d28d9;">
+            <a href="{% url 'produccion:metricas_globales_lista' %}" style="background:color-mix(in srgb,var(--hato-primary) 10%,transparent);color:var(--hato-primary);font-weight:800;border-left:3px solid var(--hato-primary);">
                 🌐 Métricas Globales (ROOT)
             </a>
 
