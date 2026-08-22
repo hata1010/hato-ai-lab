@@ -18,7 +18,7 @@ from apps.produccion.engine import (
 
 class TestSuperMotorMetricas(unittest.TestCase):
     def test_catalogo_oficial_conserva_las_8_metricas(self):
-        self.assertEqual(len(METRICAS_V1), 8)
+        self.assertEqual(len(METRICAS_V1), 12)
         for definicion in METRICAS_V1.values():
             self.assertEqual(definicion.version, "1.0")
             self.assertTrue(definicion.nombre)
@@ -99,8 +99,8 @@ class TestSuperMotorMetricas(unittest.TestCase):
         with patch.dict(sys.modules, {"apps.produccion.models": fake_models}):
             resultado = sincronizar_catalogo_oficial()
 
-        self.assertEqual(resultado["total_oficiales"], 8)
-        self.assertEqual(len(registros), 8)
+        self.assertEqual(resultado["total_oficiales"], 12)
+        self.assertEqual(len(registros), 12)
         self.assertTrue(all(r["codigo"] in METRICAS_V1 for r in registros))
         self.assertTrue(all(r["finca"] is None for r in registros))
 
