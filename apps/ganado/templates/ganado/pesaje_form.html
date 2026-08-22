@@ -1,0 +1,15 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}{% if modo == 'editar' %}Editar pesaje{% else %}Registrar pesaje{% endif %} · Hato{% endblock %}
+
+{% block content %}
+<h1>⚖️ {% if modo == 'editar' %}Editar pesaje{% else %}Registrar pesaje{% endif %}</h1>
+<p><strong>Finca:</strong> {{ finca.nombre }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Guardar</button>
+    <a href="{% url 'ganado:lista_pesajes' %}">Cancelar</a>
+</form>
+{% endblock %}

@@ -1,5 +1,6 @@
 from django.urls import path
 
+from . import pesaje_views
 from . import salud_views
 from . import views
 
@@ -14,4 +15,8 @@ urlpatterns = [
     path("salud/animal/<int:animal_id>/", salud_views.historia_salud_animal, name="historia_salud_animal"),
     path("salud/crear/", salud_views.crear_evento_salud, name="crear_evento_salud"),
     path("salud/<int:evento_id>/editar/", salud_views.editar_evento_salud, name="editar_evento_salud"),
+    path("pesajes/", pesaje_views.lista_pesajes, name="lista_pesajes"),
+    path("pesajes/crear/", pesaje_views.crear_pesaje, name="crear_pesaje"),
+    path("pesajes/<int:pesaje_id>/editar/", pesaje_views.editar_pesaje, name="editar_pesaje"),
+    path("pesajes/animal/<int:animal_id>/", pesaje_views.historial_pesajes_animal, name="historial_pesajes_animal"),
 ]

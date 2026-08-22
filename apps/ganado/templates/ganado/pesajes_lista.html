@@ -1,0 +1,37 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Pesajes · Hato{% endblock %}
+
+{% block content %}
+<h1>⚖️ Pesajes</h1>
+<p><strong>Finca:</strong> {{ finca.nombre }}</p>
+
+<div style="display:flex;gap:10px;align-items:center;margin:16px 0;flex-wrap:wrap;">
+    <form method="get">
+        <input type="search" name="q" value="{{ consulta }}" placeholder="Buscar por arete o nombre">
+        <button type="submit">Buscar</button>
+    </form>
+    {% if puede_gestionar %}
+        <a href="{% url 'ganado:crear_pesaje' %}">➕ Registrar pesaje</a>
+    {% endif %}
+</div>
+
+<table>
+    <thead><tr><th>Fecha</th><th>Animal</th><th>Peso (kg)</th><th>Observaciones</th><th></th></tr></thead>
+    <tbody>
+    {% for pesaje in pesajes %}
+        <tr>
+            <td>{{ pesaje.fecha|date:"d/m/Y H:i" }}</td>
+            <td><a href="{% url 'ganado:detalle_animal' pesaje.animal.id %}">{{ pesaje.animal }}</a></td>
+            <td>{{ pesaje.peso_kg }}</td>
+            <td>{{ pesaje.observaciones|default:"—" }}</td>
+            <td>
+                {% if puede_gestionar %}<a href="{% url 'ganado:editar_pesaje' pesaje.id %}">Editar</a>{% endif %}
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="5">No hay pesajes registrados para la finca activa.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
