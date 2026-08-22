@@ -1,0 +1,1 @@
+"""Hato application package."""
