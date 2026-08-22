@@ -98,6 +98,7 @@ def lista_movilidad(request):
                 movimiento for movimiento in tarjeta["movimientos"]
                 if consulta_lower in movimiento.animal.numero_arete.lower()
                 or consulta_lower in movimiento.animal.nombre_propio.lower()
+                or consulta_lower in tarjeta["potrero"].nombre.lower()
             ]
             tarjeta["cantidad"] = len(tarjeta["movimientos"])
             capacidad = tarjeta["capacidad"]
@@ -213,6 +214,8 @@ def cambiar_potrero(request, movimiento_id):
                     observaciones=form.cleaned_data["observaciones"],
                 )
             messages.success(request, "Cambio de potrero registrado y movimiento anterior cerrado correctamente.")
+            if request.POST.get("next") == "tablero":
+                return redirect("ganado:lista_movilidad")
             return redirect("ganado:historial_movilidad_animal", animal_id=movimiento.animal_id)
 
     return render(request, "ganado/cambio_potrero_form.html", {
