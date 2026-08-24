@@ -51,7 +51,7 @@ class Finca(models.Model):
 
     zona_horaria = models.CharField(
         max_length=50,
-        default="America/Bogota",
+        default="America/Caracas",
     )
 
     moneda = models.CharField(
