@@ -122,7 +122,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# Hato opera en Venezuela: una única zona horaria global para la aplicación.
+TIME_ZONE = 'America/Caracas'
 
 USE_I18N = True
 
