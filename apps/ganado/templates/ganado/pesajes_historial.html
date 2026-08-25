@@ -1,0 +1,8 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Historial de pesajes · {{ animal.numero_arete }}{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;"><div><h1>⚖️ Historial de pesajes</h1><p><strong>{{ animal.numero_arete }}</strong> · {{ animal.nombre_propio|default:"Sin nombre" }} · {{ finca.nombre }}</p></div><div><a href="{% url 'ganado:detalle_animal' animal.id %}">← Ficha del animal</a>{% if puede_gestionar %} · <a href="{% url 'ganado:crear_pesaje' %}?animal={{ animal.id }}">➕ Registrar pesaje</a>{% endif %}</div></div>
+<section>{% if pesajes %}<table><tr><th>Fecha y hora</th><th>Peso</th><th>Observaciones</th></tr>{% for p in pesajes %}<tr><td>{{ p.fecha }}</td><td><strong>{{ p.peso_kg }} kg</strong></td><td>{{ p.observaciones|default:"—" }}</td></tr>{% endfor %}</table>{% else %}<p>Sin pesajes registrados para este animal.</p>{% endif %}</section>
+{% endblock %}
