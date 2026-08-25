@@ -1,0 +1,25 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Pesajes · {{ finca.nombre }}{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div><h1>⚖️ Pesajes</h1><p>Registro e historial de pesos · {{ finca.nombre }}</p></div>
+    {% if puede_gestionar %}<a href="{% url 'ganado:crear_pesaje' %}">➕ Registrar pesaje</a>{% endif %}
+</div>
+<section>
+    <form method="get" style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;">
+        <div><label for="id_q"><strong>Animal / arete</strong></label><br><input id="id_q" type="search" name="q" value="{{ consulta }}" placeholder="Ej. PR-D-001"></div>
+        <button type="submit">Buscar</button>
+        {% if consulta %}<a href="{% url 'ganado:lista_pesajes' %}">Limpiar</a>{% endif %}
+    </form>
+</section>
+<section>
+    <h2>Historial reciente</h2>
+    {% if pesajes %}
+    <table><tr><th>Animal</th><th>Fecha</th><th>Peso</th><th>Observaciones</th><th>Acción</th></tr>
+    {% for p in pesajes %}<tr><td><a href="{% url 'ganado:detalle_animal' p.animal.id %}">{{ p.animal.numero_arete }}</a></td><td>{{ p.fecha }}</td><td><strong>{{ p.peso_kg }} kg</strong></td><td>{{ p.observaciones|default:"—" }}</td><td><a href="{% url 'ganado:historial_pesajes_animal' p.animal.id %}">Ver historial</a></td></tr>{% endfor %}
+    </table>
+    {% else %}<p>No hay pesajes registrados para la finca activa.</p>{% endif %}
+</section>
+{% endblock %}
