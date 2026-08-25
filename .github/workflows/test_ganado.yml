@@ -68,5 +68,5 @@ jobs:
       - name: Apply migrations
         run: python manage.py migrate --noinput
 
-      - name: Run Ganado tests
-        run: python manage.py test apps.ganado --verbosity 2
+      - name: Run Ganado and Core tests
+        run: python manage.py test apps.ganado apps.core --verbosity 2
