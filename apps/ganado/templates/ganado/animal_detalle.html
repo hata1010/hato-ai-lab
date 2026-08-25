@@ -35,8 +35,11 @@
 </section>
 
 <section>
-<h2>⚖️ Pesajes</h2>
-{% if pesajes %}<table><tr><th>Fecha</th><th>Peso</th><th>Observaciones</th></tr>{% for p in pesajes %}<tr><td>{{ p.fecha }}</td><td>{{ p.peso_kg }} kg</td><td>{{ p.observaciones|default:"—" }}</td></tr>{% endfor %}</table>{% else %}<p>Sin pesajes registrados.</p>{% endif %}
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <h2>⚖️ Pesajes</h2>
+    <div><a href="{% url 'ganado:historial_pesajes_animal' animal.id %}">Ver historial completo</a>{% if puede_gestionar %} · <a href="{% url 'ganado:crear_pesaje' %}?animal={{ animal.id }}">➕ Registrar pesaje</a>{% endif %}</div>
+</div>
+{% if pesajes %}<table><tr><th>Fecha</th><th>Peso</th><th>Observaciones</th></tr>{% for p in pesajes|slice:":5" %}<tr><td>{{ p.fecha }}</td><td>{{ p.peso_kg }} kg</td><td>{{ p.observaciones|default:"—" }}</td></tr>{% endfor %}</table>{% else %}<p>Sin pesajes registrados.</p>{% endif %}
 </section>
 
 <section>
