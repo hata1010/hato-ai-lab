@@ -1,0 +1,15 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Registrar pesaje · {{ finca.nombre }}{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;"><div><h1>⚖️ Registrar pesaje</h1><p>{{ finca.nombre }}</p></div><a href="{% url 'ganado:lista_pesajes' %}">← Pesajes</a></div>
+<section><form method="post">{% csrf_token %}{{ form.non_field_errors }}
+<div style="display:grid;gap:12px;max-width:640px;">
+<div>{{ form.animal.label_tag }}<br>{{ form.animal }}{{ form.animal.errors }}</div>
+<div>{{ form.fecha.label_tag }}<br>{{ form.fecha }}{{ form.fecha.errors }}</div>
+<div>{{ form.peso_kg.label_tag }}<br>{{ form.peso_kg }}{{ form.peso_kg.errors }}</div>
+<div>{{ form.observaciones.label_tag }}<br>{{ form.observaciones }}{{ form.observaciones.errors }}</div>
+<div><button type="submit">💾 Guardar pesaje</button> <a href="{% url 'ganado:lista_pesajes' %}">Cancelar</a></div>
+</div></form></section>
+{% endblock %}
