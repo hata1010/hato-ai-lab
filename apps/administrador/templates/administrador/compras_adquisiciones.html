@@ -3,93 +3,89 @@
 {% block title %}Compras y adquisiciones · Hato{% endblock %}
 
 {% block content %}
-<section class="page-header">
-    <div>
-        <h1>🛒 Compras y adquisiciones</h1>
-        <p class="muted">
-            {% if finca %}
-                Finca activa · <strong>{{ finca.nombre }}</strong>
-            {% else %}
-                Selecciona una finca activa para consultar sus adquisiciones.
-            {% endif %}
-        </p>
-    </div>
-</section>
-
-<div class="dashboard-grid">
-    <article class="card">
-        <div class="card-header">
-            <span class="card-icon">🐄</span>
-            <div>
-                <h2>Compra de animales</h2>
-                <p class="muted">Adquisiciones de ganado ya soportadas por Hato.</p>
-            </div>
-        </div>
-
-        <div class="card-actions">
-            <a class="button button-primary" href="{% url 'admin:ganado_adquisicion_changelist' %}">
-                Ver adquisiciones
-            </a>
-            <a class="button button-secondary" href="{% url 'admin:ganado_adquisicion_add' %}">
-                ➕ Registrar compra
-            </a>
-        </div>
-    </article>
-
-    <article class="card">
-        <div class="card-header">
-            <span class="card-icon">📦</span>
-            <div>
-                <h2>Adquisición de suministros</h2>
-                <p class="muted">Alimentos, medicamentos, materiales e insumos de operación.</p>
-            </div>
-        </div>
-        <p>
-            Esta variante queda reservada en la navegación, pero todavía no tiene un modelo
-            propio de inventario/adquisición en la base actual. No se crea una estructura nueva
-            en esta etapa para preservar la base estable.
-        </p>
-        <span class="badge">🟡 Próxima fase · Recursos y Operación</span>
-    </article>
-</div>
-
-{% if finca %}
-<section class="card" style="margin-top:1.5rem;">
-    <div class="card-header">
+<div class="v2-shell">
+    <div class="v2-header">
         <div>
-            <h2>Historial de adquisiciones</h2>
-            <p class="muted">Registros de compra asociados a la finca activa.</p>
+            <div class="eyebrow">COMERCIALIZACIÓN · ADQUISICIONES</div>
+            <h1>🛒 Compras y adquisiciones</h1>
+            <p>
+                {% if finca %}
+                    Finca activa · <strong>{{ finca.nombre }}</strong>
+                {% else %}
+                    Selecciona una finca activa para consultar sus adquisiciones.
+                {% endif %}
+            </p>
         </div>
     </div>
 
-    {% if adquisiciones %}
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Proveedor</th>
-                        <th>Documento</th>
-                        <th>Animales</th>
-                        <th>Costo total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for adquisicion in adquisiciones %}
-                    <tr>
-                        <td>{{ adquisicion.fecha }}</td>
-                        <td>{{ adquisicion.proveedor }}</td>
-                        <td>{{ adquisicion.numero_documento|default:"—" }}</td>
-                        <td>{{ adquisicion.animales.all|length }}</td>
-                        <td>{{ adquisicion.costo_total|default:"—" }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="v2-grid two">
+        <section class="v2-panel">
+            <div class="v2-panel-head">
+                <div>
+                    <div class="eyebrow">3.1 · COMPRA DE ANIMALES</div>
+                    <h2>🐄 Adquisiciones de ganado</h2>
+                </div>
+                <span class="source-chip">Modelo existente</span>
+            </div>
+            <p class="v2-note">
+                Esta variante ya está soportada por <strong>Adquisicion</strong> y
+                <strong>AdquisicionAnimal</strong>. Hato consulta los registros de la finca activa
+                y conserva el registro técnico existente.
+            </p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">
+                <a class="btn btn-primary" href="{% url 'admin:ganado_adquisicion_changelist' %}">Ver adquisiciones</a>
+                <a class="btn" href="{% url 'admin:ganado_adquisicion_add' %}">➕ Registrar compra</a>
+            </div>
+        </section>
+
+        <section class="v2-panel">
+            <div class="v2-panel-head">
+                <div>
+                    <div class="eyebrow">4.1 · RECURSOS Y OPERACIÓN</div>
+                    <h2>📦 Adquisición de suministros</h2>
+                </div>
+                <span class="source-chip">Próxima fase</span>
+            </div>
+            <p class="v2-note">
+                Incluye alimentos, medicamentos, materiales e insumos de operación.
+                La base actual todavía no tiene un dominio propio de inventario/adquisición de
+                suministros. Por eso se deja visible como destino arquitectónico, sin inventar
+                modelos ni alterar la base estable.
+            </p>
+        </section>
+    </div>
+
+    {% if finca %}
+    <section class="v2-panel" style="margin-top:18px;">
+        <div class="v2-panel-head">
+            <div>
+                <div class="eyebrow">REGISTRO ACTUAL</div>
+                <h2>Historial de adquisiciones</h2>
+            </div>
+            <span class="source-chip">Finca activa</span>
         </div>
-    {% else %}
-        <p class="muted">No hay adquisiciones registradas para la finca activa.</p>
+
+        {% if adquisiciones %}
+        <div class="potrero-table">
+            <div class="potrero-row table-head">
+                <span>Fecha</span>
+                <span>Proveedor / documento</span>
+                <span>Animales</span>
+                <span>Costo</span>
+            </div>
+            {% for adquisicion in adquisiciones %}
+            <div class="potrero-row">
+                <span><strong>{{ adquisicion.fecha }}</strong></span>
+                <span>{{ adquisicion.proveedor }} · {{ adquisicion.numero_documento|default:"Sin documento" }}</span>
+                <span>{{ adquisicion.animales.all|length }}</span>
+                <span>{{ adquisicion.costo_total|default:"—" }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty">No hay adquisiciones registradas para la finca activa.</p>
+        {% endif %}
+    </section>
     {% endif %}
-</section>
-{% endif %}
+</div>
 {% endblock %}
