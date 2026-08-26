@@ -21,7 +21,20 @@ class PesajesUITests(TestCase):
         self.client.force_login(self.user)
 
     def tenant_context(self):
-        return patch.multiple("apps.ganado.pesaje_views", obtener_finca_activa=lambda request: self.finca, verificar_acceso_finca=lambda user, finca: True, obtener_rol_usuario_finca=lambda user, finca: "administrador")
+        return patch.multiple(
+            "apps.ganado.pesaje_views",
+            obtener_finca_activa=lambda request: self.finca,
+            verificar_acceso_finca=lambda user, finca: True,
+            obtener_rol_usuario_finca=lambda user, finca: "administrador",
+        )
+
+    def detalle_animal_context(self):
+        return patch.multiple(
+            "apps.ganado.views",
+            obtener_finca_activa=lambda request: self.finca,
+            verificar_acceso_finca=lambda user, finca: True,
+            obtener_rol_usuario_finca=lambda user, finca: "administrador",
+        )
 
     def test_lista_pesajes_es_accesible(self):
         with self.tenant_context():
@@ -52,7 +65,7 @@ class PesajesUITests(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_ficha_animal_expone_navegacion_de_pesajes(self):
-        with self.tenant_context():
+        with self.detalle_animal_context():
             response = self.client.get(reverse("ganado:detalle_animal", args=[self.animal.id]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("ganado:historial_pesajes_animal", args=[self.animal.id]))
