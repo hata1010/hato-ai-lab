@@ -3,7 +3,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
 
 from apps.core.tenant import (
     obtener_finca_activa,
@@ -106,6 +105,12 @@ def crear_animal(request):
                 animal = form.save(commit=False)
                 animal.finca = finca
                 origen = form.cleaned_data["origen"]
+                salud = {
+                    "salud_inicial_tipo": form.cleaned_data.get("salud_inicial_tipo", ""),
+                    "salud_inicial_fecha": form.cleaned_data.get("salud_inicial_fecha"),
+                    "salud_inicial_veterinario": form.cleaned_data.get("salud_inicial_veterinario", ""),
+                    "salud_inicial_observaciones": form.cleaned_data.get("salud_inicial_observaciones", ""),
+                }
 
                 if origen == "nacimiento_granja":
                     animal = registrar_ingreso_nacimiento(
@@ -119,19 +124,20 @@ def crear_animal(request):
                         potrero_inicial=form.cleaned_data.get("potrero_inicial"),
                         observaciones=form.cleaned_data.get("observaciones", ""),
                         creado_por=request.user,
+                        **salud,
                     )
                 else:
-                    fecha_compra = form.cleaned_data["fecha_compra"]
                     animal = registrar_ingreso_compra(
                         finca=finca,
                         animal=animal,
                         proveedor=form.cleaned_data["proveedor"],
-                        fecha_compra=fecha_compra,
+                        fecha_compra=form.cleaned_data["fecha_compra"],
                         documento_compra=form.cleaned_data.get("documento_compra", ""),
                         precio_individual=form.cleaned_data.get("precio_individual"),
                         peso_inicial=form.cleaned_data.get("peso_inicial"),
                         potrero_inicial=form.cleaned_data.get("potrero_inicial"),
                         observaciones=form.cleaned_data.get("observaciones", ""),
+                        **salud,
                     )
             messages.success(request, f"Animal {animal.numero_arete} registrado correctamente.")
             return redirect("ganado:detalle_animal", animal_id=animal.id)
