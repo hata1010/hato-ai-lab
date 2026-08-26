@@ -3,115 +3,193 @@
 {% block title %}Registrar ingreso de animal · {{ finca.nombre }}{% endblock %}
 
 {% block content %}
-<h1>🐄 Registrar ingreso de animal</h1>
-<p><strong>Finca:</strong> {{ finca.nombre }} · <strong>Rol:</strong> {{ rol }}</p>
-<p>El sistema registra el animal y crea las relaciones iniciales según el tipo de ingreso.</p>
+<style>
+    .ingreso-page { max-width: 980px; margin: 0 auto; }
+    .ingreso-header { margin-bottom: 22px; }
+    .ingreso-header h1 { margin-bottom: 6px; }
+    .ingreso-muted { opacity: .78; margin-top: 0; }
+    .ingreso-form { display: grid; gap: 18px; }
+    .ingreso-card { padding: 20px; border: 1px solid color-mix(in srgb, var(--hato-primary) 18%, transparent); border-radius: 14px; background: color-mix(in srgb, var(--hato-primary) 4%, transparent); }
+    .ingreso-card h2 { margin-top: 0; font-size: 1.05rem; }
+    .ingreso-step { font-size: .78rem; opacity: .68; text-transform: uppercase; letter-spacing: .06em; }
+    .origen-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+    .origen-option { display: block; padding: 16px; border: 1px solid color-mix(in srgb, var(--hato-primary) 24%, transparent); border-radius: 12px; cursor: pointer; background: color-mix(in srgb, var(--hato-primary) 3%, transparent); }
+    .origen-option:hover { border-color: var(--hato-primary); }
+    .origen-option input { margin-right: 8px; }
+    .origen-title { display: block; font-weight: 800; margin-bottom: 4px; }
+    .origen-help { display: block; opacity: .72; font-size: .88rem; margin-left: 25px; }
+    .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .field { margin: 0; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { display: block; font-weight: 700; margin-bottom: 6px; }
+    .field input:not([type="checkbox"]), .field select, .field textarea { width: 100%; box-sizing: border-box; }
+    .field textarea { min-height: 84px; }
+    .field-errors, .non-field-errors { color: #b91c1c; margin-top: 5px; }
+    .section-help { opacity: .72; margin-top: -6px; }
+    .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .actions button { cursor: pointer; }
+    .cancel-link { padding: 9px 14px; }
+    .hidden-section { display: none; }
+    @media (max-width: 720px) {
+        .origen-options, .field-grid { grid-template-columns: 1fr; }
+        .field.full { grid-column: auto; }
+    }
+</style>
 
-<form method="post" id="ingreso-animal-form">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
+<div class="ingreso-page">
+    <div class="ingreso-header">
+        <div class="ingreso-step">Ganado · Nuevo registro</div>
+        <h1>🐄 Registrar ingreso de animal</h1>
+        <p class="ingreso-muted"><strong>Finca:</strong> {{ finca.nombre }} · <strong>Rol:</strong> {{ rol }}</p>
+        <p>Una sola ficha para cualquier animal que entra al hato: <strong>nacido en la finca</strong> o <strong>adquirido por compra</strong>.</p>
+    </div>
 
-    <section>
-        <h2>1. Origen</h2>
-        {{ form.origen.errors }}
-        {{ form.origen }}
-    </section>
+    <form method="post" id="ingreso-animal-form" class="ingreso-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="non-field-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
 
-    <section>
-        <h2>2. Identidad</h2>
-        {% for field in form.visible_fields %}
-            {% if field.name == "numero_arete" or field.name == "nombre_propio" or field.name == "fecha_nacimiento" or field.name == "sexo" or field.name == "especie" or field.name == "raza_declarada" or field.name == "categoria" or field.name == "microchip" or field.name == "tatuaje" or field.name == "registro_genealogico" or field.name == "estado" or field.name == "observaciones" or field.name == "is_active" %}
-                <div style="margin:12px 0;">
-                    <label for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong></label><br>
-                    {{ field }}
-                    {% for error in field.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
+        <section class="ingreso-card">
+            <div class="ingreso-step">Paso 1</div>
+            <h2>¿Cómo ingresa el animal?</h2>
+            {{ form.origen.errors }}
+            <div class="origen-options">
+                <label class="origen-option">
+                    <input type="radio" name="origen" value="compra" {% if form.origen.value == "compra" or not form.origen.value %}checked{% endif %}>
+                    <span class="origen-title">🧾 Compra / adquisición</span>
+                    <span class="origen-help">Animal que llega desde un proveedor o tercero.</span>
+                </label>
+                <label class="origen-option">
+                    <input type="radio" name="origen" value="nacimiento_granja" {% if form.origen.value == "nacimiento_granja" %}checked{% endif %}>
+                    <span class="origen-title">🐮 Nacimiento en la finca</span>
+                    <span class="origen-help">Animal nacido dentro del hato, con filiación y parto.</span>
+                </label>
+            </div>
+        </section>
+
+        <section class="ingreso-card">
+            <div class="ingreso-step">Paso 2</div>
+            <h2>Identidad del animal</h2>
+            <div class="field-grid">
+                {% for field in form.visible_fields %}
+                    {% if field.name == "numero_arete" or field.name == "nombre_propio" or field.name == "fecha_nacimiento" or field.name == "sexo" or field.name == "especie" or field.name == "raza_declarada" or field.name == "categoria" or field.name == "microchip" or field.name == "tatuaje" or field.name == "registro_genealogico" or field.name == "estado" %}
+                        <div class="field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}<div class="field-errors">{{ error }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="ingreso-card">
+            <div class="ingreso-step">Paso 3</div>
+            <h2>Filiación</h2>
+            <p class="section-help">Los padres se buscan únicamente dentro de la finca activa y se filtran por sexo.</p>
+            <div class="field-grid">
+                <div class="field">
+                    <label for="{{ form.padre.id_for_label }}">{{ form.padre.label }}</label>
+                    {{ form.padre }}
+                    {% for error in form.padre.errors %}<div class="field-errors">{{ error }}</div>{% endfor %}
                 </div>
-            {% endif %}
-        {% endfor %}
-    </section>
-
-    <section>
-        <h2>3. Filiación</h2>
-        <p>Padre = toro. Madre = vaca. Ambos se filtran por sexo y finca.</p>
-        <div style="margin:12px 0;">
-            <label for="{{ form.padre.id_for_label }}"><strong>{{ form.padre.label }}</strong></label><br>
-            {{ form.padre }}
-            {% for error in form.padre.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
-        </div>
-        <div style="margin:12px 0;">
-            <label for="{{ form.madre.id_for_label }}"><strong>{{ form.madre.label }}</strong></label><br>
-            {{ form.madre }}
-            {% for error in form.madre.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
-        </div>
-    </section>
-
-    <section id="compra-section">
-        <h2>4A. Compra / adquisición</h2>
-        {% for field in form.visible_fields %}
-            {% if field.name == "proveedor" or field.name == "fecha_compra" or field.name == "documento_compra" or field.name == "precio_individual" %}
-                <div style="margin:12px 0;">
-                    <label for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong></label><br>
-                    {{ field }}
-                    {% for error in field.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
+                <div class="field">
+                    <label for="{{ form.madre.id_for_label }}">{{ form.madre.label }}</label>
+                    {{ form.madre }}
+                    {% for error in form.madre.errors %}<div class="field-errors">{{ error }}</div>{% endfor %}
                 </div>
-            {% endif %}
-        {% endfor %}
-    </section>
+            </div>
+        </section>
 
-    <section id="nacimiento-section">
-        <h2>4B. Nacimiento / parto</h2>
-        {% for field in form.visible_fields %}
-            {% if field.name == "fecha_parto" or field.name == "tipo_parto" %}
-                <div style="margin:12px 0;">
-                    <label for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong></label><br>
-                    {{ field }}
-                    {% for error in field.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
+        <section id="compra-section" class="ingreso-card">
+            <div class="ingreso-step">Paso 4A · Compra</div>
+            <h2>Datos de adquisición</h2>
+            <div class="field-grid">
+                {% for field in form.visible_fields %}
+                    {% if field.name == "proveedor" or field.name == "fecha_compra" or field.name == "documento_compra" or field.name == "precio_individual" %}
+                        <div class="field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}<div class="field-errors">{{ error }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </section>
+
+        <section id="nacimiento-section" class="ingreso-card hidden-section">
+            <div class="ingreso-step">Paso 4B · Nacimiento</div>
+            <h2>Datos del nacimiento</h2>
+            <div class="field-grid">
+                {% for field in form.visible_fields %}
+                    {% if field.name == "fecha_parto" or field.name == "tipo_parto" %}
+                        <div class="field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}<div class="field-errors">{{ error }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="ingreso-card">
+            <div class="ingreso-step">Paso 5</div>
+            <h2>Entrada al hato</h2>
+            <div class="field-grid">
+                <div class="field">
+                    <label for="{{ form.peso_inicial.id_for_label }}">{{ form.peso_inicial.label }}</label>
+                    {{ form.peso_inicial }}
+                    {% for error in form.peso_inicial.errors %}<div class="field-errors">{{ error }}</div>{% endfor %}
                 </div>
-            {% endif %}
-        {% endfor %}
-    </section>
+                <div class="field">
+                    <label for="{{ form.potrero_inicial.id_for_label }}">{{ form.potrero_inicial.label }}</label>
+                    {{ form.potrero_inicial }}
+                    {% for error in form.potrero_inicial.errors %}<div class="field-errors">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="field full">
+                    <label for="{{ form.observaciones.id_for_label }}">{{ form.observaciones.label }}</label>
+                    {{ form.observaciones }}
+                    {% for error in form.observaciones.errors %}<div class="field-errors">{{ error }}</div>{% endfor %}
+                </div>
+            </div>
+        </section>
 
-    <section>
-        <h2>5. Peso y ubicación inicial</h2>
-        <div style="margin:12px 0;">
-            <label for="{{ form.peso_inicial.id_for_label }}"><strong>{{ form.peso_inicial.label }}</strong></label><br>
-            {{ form.peso_inicial }}
-            {% for error in form.peso_inicial.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
-        </div>
-        <div style="margin:12px 0;">
-            <label for="{{ form.potrero_inicial.id_for_label }}"><strong>{{ form.potrero_inicial.label }}</strong></label><br>
-            {{ form.potrero_inicial }}
-            {% for error in form.potrero_inicial.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
-        </div>
-    </section>
+        <section class="ingreso-card">
+            <div class="ingreso-step">Paso 6 · Opcional</div>
+            <h2>Evaluación veterinaria inicial</h2>
+            <p class="section-help">Solo se registra si existe una evaluación al momento del ingreso.</p>
+            <div class="field-grid">
+                <div class="field">
+                    <label for="{{ form.salud_inicial_tipo.id_for_label }}">{{ form.salud_inicial_tipo.label }}</label>
+                    {{ form.salud_inicial_tipo }}
+                    {% for error in form.salud_inicial_tipo.errors %}<div class="field-errors">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="field">
+                    <label for="{{ form.salud_inicial_fecha.id_for_label }}">{{ form.salud_inicial_fecha.label }}</label>
+                    {{ form.salud_inicial_fecha }}
+                    {% for error in form.salud_inicial_fecha.errors %}<div class="field-errors">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="field">
+                    <label for="{{ form.salud_inicial_veterinario.id_for_label }}">{{ form.salud_inicial_veterinario.label }}</label>
+                    {{ form.salud_inicial_veterinario }}
+                    {% for error in form.salud_inicial_veterinario.errors %}<div class="field-errors">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="field">
+                    <label for="{{ form.salud_inicial_observaciones.id_for_label }}">{{ form.salud_inicial_observaciones.label }}</label>
+                    {{ form.salud_inicial_observaciones }}
+                    {% for error in form.salud_inicial_observaciones.errors %}<div class="field-errors">{{ error }}</div>{% endfor %}
+                </div>
+            </div>
+        </section>
 
-    <section>
-        <h2>6. Evaluación veterinaria inicial</h2>
-        <div style="margin:12px 0;">
-            <label for="{{ form.salud_inicial_tipo.id_for_label }}"><strong>{{ form.salud_inicial_tipo.label }}</strong></label><br>
-            {{ form.salud_inicial_tipo }}
-            {% for error in form.salud_inicial_tipo.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
+        <div class="actions">
+            <button type="submit">💾 Registrar ingreso y crear ficha</button>
+            <a class="cancel-link" href="{% url 'ganado:lista_animales' %}">Cancelar</a>
         </div>
-        <div style="margin:12px 0;">
-            <label for="{{ form.salud_inicial_fecha.id_for_label }}"><strong>{{ form.salud_inicial_fecha.label }}</strong></label><br>
-            {{ form.salud_inicial_fecha }}
-            {% for error in form.salud_inicial_fecha.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
-        </div>
-        <div style="margin:12px 0;">
-            <label for="{{ form.salud_inicial_veterinario.id_for_label }}"><strong>{{ form.salud_inicial_veterinario.label }}</strong></label><br>
-            {{ form.salud_inicial_veterinario }}
-            {% for error in form.salud_inicial_veterinario.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
-        </div>
-        <div style="margin:12px 0;">
-            <label for="{{ form.salud_inicial_observaciones.id_for_label }}"><strong>{{ form.salud_inicial_observaciones.label }}</strong></label><br>
-            {{ form.salud_inicial_observaciones }}
-            {% for error in form.salud_inicial_observaciones.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
-        </div>
-    </section>
-
-    <button type="submit">💾 Registrar ingreso completo</button>
-    <a href="{% url 'ganado:lista_animales' %}">Cancelar</a>
-</form>
+    </form>
+</div>
 
 <script>
 (function () {
@@ -119,14 +197,16 @@
     const purchase = document.getElementById("compra-section");
     const birth = document.getElementById("nacimiento-section");
     const radios = form.querySelectorAll('input[name="origen"]');
-    function sync() {
+
+    function syncOrigin() {
         const selected = form.querySelector('input[name="origen"]:checked');
         const birthMode = selected && selected.value === "nacimiento_granja";
-        purchase.style.display = birthMode ? "none" : "block";
-        birth.style.display = birthMode ? "block" : "none";
+        purchase.classList.toggle("hidden-section", birthMode);
+        birth.classList.toggle("hidden-section", !birthMode);
     }
-    radios.forEach((radio) => radio.addEventListener("change", sync));
-    sync();
+
+    radios.forEach((radio) => radio.addEventListener("change", syncOrigin));
+    syncOrigin();
 })();
 </script>
 {% endblock %}
