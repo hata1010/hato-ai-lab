@@ -19,7 +19,26 @@
 </section>
 
 <section>
-<h2>Identificación y genealogía</h2>
+<h2>📍 Origen del animal</h2>
+{% if animal.procedencia %}
+<p><strong>Procedencia:</strong> {{ animal.procedencia.get_tipo_display }}</p>
+<p><strong>Fecha:</strong> {{ animal.procedencia.fecha|default:"—" }}</p>
+<p><strong>Origen:</strong> {{ animal.procedencia.origen_nombre|default:"—" }}</p>
+{% else %}
+<p>Sin procedencia registrada.</p>
+{% endif %}
+{% if animal.adquisicion %}
+<p><strong>Compra:</strong> {{ animal.adquisicion.adquisicion }} · Precio individual: {{ animal.adquisicion.precio_individual|default:"—" }}</p>
+<p><strong>Proveedor:</strong> {{ animal.adquisicion.adquisicion.proveedor }} · Documento: {{ animal.adquisicion.adquisicion.numero_documento|default:"—" }}</p>
+{% endif %}
+{% if animal.nacimiento_reproductivo %}
+<p><strong>Nacimiento:</strong> parto de {{ animal.nacimiento_reproductivo.parto.animal }} · {{ animal.nacimiento_reproductivo.parto.fecha }}</p>
+<p><strong>Padre registrado en el parto:</strong> {{ animal.nacimiento_reproductivo.parto.toro|default:"No registrado" }}</p>
+{% endif %}
+</section>
+
+<section>
+<h2>🧬 Identificación y genealogía</h2>
 <p><strong>Microchip:</strong> {{ animal.microchip|default:"—" }} · <strong>Tatuaje:</strong> {{ animal.tatuaje|default:"—" }}</p>
 <p><strong>Registro genealógico:</strong> {{ animal.registro_genealogico|default:"—" }}</p>
 <p><strong>Padre:</strong> {{ animal.padre|default:"—" }} · <strong>Madre:</strong> {{ animal.madre|default:"—" }}</p>
