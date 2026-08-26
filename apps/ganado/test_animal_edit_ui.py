@@ -191,7 +191,7 @@ class AnimalEditUITests(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn("padre", form.errors)
-        self.assertIn("misma especie", str(form.errors["padre"]))
+        self.assertIn("Select a valid choice", str(form.errors["padre"]))
 
     def test_cambio_de_especie_no_acepta_padre_de_especie_anterior(self):
         form = AnimalEditForm(
