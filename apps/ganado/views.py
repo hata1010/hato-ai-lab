@@ -1,7 +1,9 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from apps.core.tenant import (
     obtener_finca_activa,
@@ -9,8 +11,9 @@ from apps.core.tenant import (
     verificar_acceso_finca,
 )
 
-from .forms import AnimalForm
+from .forms import AnimalForm, IngresoAnimalForm
 from .models import Animal
+from .services_ingreso import registrar_ingreso_compra, registrar_ingreso_nacimiento
 
 
 ROLES_GESTION_ANIMALES = {"superusuario", "propietario", "administrador"}
@@ -96,18 +99,49 @@ def crear_animal(request):
     if not _puede_gestionar_animales(request, finca):
         raise PermissionDenied("Tu rol no permite registrar animales.")
 
-    form = AnimalForm(request.POST or None, finca=finca)
+    form = IngresoAnimalForm(request.POST or None, finca=finca)
     if request.method == "POST" and form.is_valid():
-        animal = form.save(commit=False)
-        animal.finca = finca
-        animal.save()
-        messages.success(request, f"Animal {animal.numero_arete} registrado correctamente.")
-        return redirect("ganado:detalle_animal", animal_id=animal.id)
+        try:
+            with transaction.atomic():
+                animal = form.save(commit=False)
+                animal.finca = finca
+                origen = form.cleaned_data["origen"]
+
+                if origen == "nacimiento_granja":
+                    animal = registrar_ingreso_nacimiento(
+                        finca=finca,
+                        animal=animal,
+                        madre=form.cleaned_data["madre"],
+                        padre=form.cleaned_data.get("padre"),
+                        fecha_parto=form.cleaned_data["fecha_parto"],
+                        tipo_parto=form.cleaned_data["tipo_parto"],
+                        peso_inicial=form.cleaned_data.get("peso_inicial"),
+                        potrero_inicial=form.cleaned_data.get("potrero_inicial"),
+                        observaciones=form.cleaned_data.get("observaciones", ""),
+                        creado_por=request.user,
+                    )
+                else:
+                    fecha_compra = form.cleaned_data["fecha_compra"]
+                    animal = registrar_ingreso_compra(
+                        finca=finca,
+                        animal=animal,
+                        proveedor=form.cleaned_data["proveedor"],
+                        fecha_compra=fecha_compra,
+                        documento_compra=form.cleaned_data.get("documento_compra", ""),
+                        precio_individual=form.cleaned_data.get("precio_individual"),
+                        peso_inicial=form.cleaned_data.get("peso_inicial"),
+                        potrero_inicial=form.cleaned_data.get("potrero_inicial"),
+                        observaciones=form.cleaned_data.get("observaciones", ""),
+                    )
+            messages.success(request, f"Animal {animal.numero_arete} registrado correctamente.")
+            return redirect("ganado:detalle_animal", animal_id=animal.id)
+        except Exception as exc:
+            form.add_error(None, f"No fue posible completar el ingreso: {exc}")
 
     return render(
         request,
-        "ganado/animal_form.html",
-        {"finca": finca, "form": form, "modo": "crear", "rol": obtener_rol_usuario_finca(request.user, finca)},
+        "ganado/animal_ingreso.html",
+        {"finca": finca, "form": form, "rol": obtener_rol_usuario_finca(request.user, finca)},
     )
 
 
