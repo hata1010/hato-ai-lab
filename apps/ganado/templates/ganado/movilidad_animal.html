@@ -1,30 +1,8 @@
 {% extends "administrador/base.html" %}
-
 {% block title %}Movilidad {{ animal.numero_arete }} · Hato{% endblock %}
-
 {% block content %}
-<h1>🔄 Historial de movilidad</h1>
-<p><strong>Animal:</strong> {{ animal }} · <strong>Finca:</strong> {{ finca.nombre }}</p>
-<p><a href="{% url 'ganado:detalle_animal' animal.id %}">← Ficha del animal</a>{% if puede_gestionar %} · <a href="{% url 'ganado:crear_movimiento' %}?animal={{ animal.id }}">➕ Registrar entrada</a>{% endif %}</p>
-
-<table>
-<thead><tr><th>Potrero</th><th>Entrada</th><th>Salida</th><th>Estado</th><th>Observaciones</th><th>Acciones</th></tr></thead>
-<tbody>
-{% for movimiento in movimientos %}
-<tr>
-    <td>{{ movimiento.potrero }}</td>
-    <td>{{ movimiento.fecha_entrada|date:"d/m/Y H:i" }}</td>
-    <td>{{ movimiento.fecha_salida|date:"d/m/Y H:i"|default:"—" }}</td>
-    <td>{% if movimiento.activo %}🟢 Activo{% else %}⚪ Cerrado{% endif %}</td>
-    <td>{{ movimiento.observaciones|default:"—" }}</td>
-    <td>
-        {% if movimiento.activo and puede_gestionar %}
-            <a href="{% url 'ganado:cambiar_potrero' movimiento.id %}">🔀 Cambiar potrero</a> ·
-            <a href="{% url 'ganado:cerrar_movimiento' movimiento.id %}">Cerrar</a>
-        {% else %}—{% endif %}
-    </td>
-</tr>
-{% empty %}<tr><td colspan="6">Sin movimientos registrados.</td></tr>{% endfor %}
-</tbody>
-</table>
+<style>.detail-shell{max-width:1180px;margin:0 auto}.detail-card{border:1px solid color-mix(in srgb,var(--hato-primary) 16%,transparent);border-radius:14px;padding:20px;margin:18px 0;background:color-mix(in srgb,var(--hato-primary) 3%,transparent)}.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.detail-item{padding:12px;border-radius:10px;background:color-mix(in srgb,var(--hato-primary) 5%,transparent)}.detail-table{width:100%;border-collapse:collapse}.detail-table th,.detail-table td{padding:12px;border-bottom:1px solid color-mix(in srgb,var(--hato-primary) 10%,transparent);text-align:left}.detail-table th{font-size:.82rem;text-transform:uppercase;opacity:.72}.actions{white-space:nowrap}</style>
+<div class="detail-shell"><header><h1>🔄 Historial de movilidad</h1><p><strong>Animal:</strong> {{ animal }} · <strong>Finca:</strong> {{ finca.nombre }}</p><p><a href="{% url 'ganado:detalle_animal' animal.id %}">← Ficha del animal</a>{% if puede_gestionar %} · <a href="{% url 'ganado:crear_movimiento' %}?animal={{ animal.id }}">➕ Registrar entrada</a>{% endif %}</p></header>
+<section class="detail-card"><h2>🐄 Resumen del animal</h2><div class="detail-grid"><div class="detail-item"><small>Arete</small><br><strong>{{ animal.numero_arete }}</strong></div><div class="detail-item"><small>Nombre</small><br><strong>{{ animal.nombre_propio|default:"Sin nombre" }}</strong></div><div class="detail-item"><small>Estado</small><br><strong>{{ animal.get_estado_display }}</strong></div><div class="detail-item"><small>Finca</small><br><strong>{{ finca.nombre }}</strong></div></div></section>
+<section class="detail-card"><h2>📋 Historial</h2>{% if movimientos %}<div style="overflow-x:auto"><table class="detail-table"><thead><tr><th>Potrero</th><th>Entrada</th><th>Salida</th><th>Estado</th><th>Observaciones</th><th>Acciones</th></tr></thead><tbody>{% for movimiento in movimientos %}<tr><td>{{ movimiento.potrero }}</td><td>{{ movimiento.fecha_entrada|date:"d/m/Y H:i" }}</td><td>{{ movimiento.fecha_salida|date:"d/m/Y H:i"|default:"—" }}</td><td>{% if movimiento.activo %}🟢 Activo{% else %}⚪ Cerrado{% endif %}</td><td>{{ movimiento.observaciones|default:"—" }}</td><td class="actions">{% if movimiento.activo and puede_gestionar %}<a href="{% url 'ganado:cambiar_potrero' movimiento.id %}">🔀 Cambiar</a> · <a href="{% url 'ganado:cerrar_movimiento' movimiento.id %}">Cerrar</a>{% else %}—{% endif %}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p>Sin movimientos registrados.</p>{% endif %}</section></div>
 {% endblock %}

@@ -1,16 +1,6 @@
 {% extends "administrador/base.html" %}
-
 {% block title %}Cerrar movimiento · Hato{% endblock %}
-
 {% block content %}
-<h1>🔄 Cerrar movimiento</h1>
-<p><strong>Animal:</strong> {{ movimiento.animal }}</p>
-<p><strong>Potrero actual:</strong> {{ movimiento.potrero }}</p>
-<p><strong>Entrada:</strong> {{ movimiento.fecha_entrada|date:"d/m/Y H:i" }}</p>
-<form method="post">
-    {% csrf_token %}
-    <p>¿Confirmas el cierre del movimiento actual?</p>
-    <button type="submit">Cerrar movimiento</button>
-    <a href="{% url 'ganado:historial_movilidad_animal' movimiento.animal_id %}">Cancelar</a>
-</form>
+<style>.form-shell{max-width:760px;margin:0 auto}.confirm-card{border:1px solid color-mix(in srgb,var(--hato-primary) 18%,transparent);border-radius:14px;padding:24px;background:color-mix(in srgb,var(--hato-primary) 4%,transparent)}.context-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:18px 0}.context{padding:12px;border-radius:10px;background:color-mix(in srgb,var(--hato-primary) 6%,transparent)}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}</style>
+<div class="form-shell"><section class="confirm-card"><h1>🔄 Cerrar movimiento</h1><div class="context-grid"><div class="context"><small>Animal</small><br><strong>{{ movimiento.animal }}</strong></div><div class="context"><small>Potrero actual</small><br><strong>{{ movimiento.potrero }}</strong></div><div class="context"><small>Entrada</small><br><strong>{{ movimiento.fecha_entrada|date:"d/m/Y H:i" }}</strong></div></div><p>¿Confirmas el cierre del movimiento actual?</p><form method="post">{% csrf_token %}<div class="actions"><button type="submit">💾 Cerrar movimiento</button><a href="{% url 'ganado:historial_movilidad_animal' movimiento.animal_id %}">Cancelar</a></div></form></section></div>
 {% endblock %}

@@ -1,46 +1,6 @@
 {% extends "administrador/base.html" %}
-
 {% block title %}Historia clínica {{ animal.numero_arete }} · {{ finca.nombre }}{% endblock %}
-
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-    <div>
-        <h1>🩺 Historia clínica · {{ animal.numero_arete }}</h1>
-        <p>{{ animal.nombre_propio|default:"Sin nombre" }} · {{ finca.nombre }}</p>
-    </div>
-    <div>
-        <a href="{% url 'ganado:lista_salud' %}">← Salud</a>
-        {% if puede_gestionar %} · <a href="{% url 'ganado:crear_evento_salud' %}?animal={{ animal.id }}">➕ Registrar evento</a>{% endif %}
-    </div>
-</div>
-
-<section>
-    <h2>🐄 Animal</h2>
-    <p><strong>Arete:</strong> {{ animal.numero_arete }} · <strong>Especie:</strong> {{ animal.especie }} · <strong>Sexo:</strong> {{ animal.get_sexo_display }}</p>
-    <p><strong>Estado:</strong> {{ animal.get_estado_display }}</p>
-</section>
-
-<section>
-    <h2>Antecedentes sanitarios</h2>
-    {% if eventos %}
-    <table>
-        <thead><tr><th>Fecha</th><th>Tipo</th><th>Producto / diagnóstico</th><th>Dosis</th><th>Veterinario</th><th>Observaciones</th><th>Acción</th></tr></thead>
-        <tbody>
-        {% for evento in eventos %}
-        <tr>
-            <td>{{ evento.fecha }}</td>
-            <td>{{ evento.get_tipo_display }}</td>
-            <td>{{ evento.producto|default:"—" }}</td>
-            <td>{{ evento.dosis|default:"—" }}</td>
-            <td>{{ evento.nombre_veterinario|default:"—" }}</td>
-            <td>{{ evento.observaciones|default:"—" }}</td>
-            <td>{% if puede_gestionar %}<a href="{% url 'ganado:editar_evento_salud' evento.id %}">✏️ Editar</a>{% else %}Consulta{% endif %}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>No hay antecedentes sanitarios registrados para este animal.</p>
-    {% endif %}
-</section>
+<style>.list-shell{max-width:1180px;margin:0 auto}.list-card{border:1px solid color-mix(in srgb,var(--hato-primary) 16%,transparent);border-radius:14px;padding:20px;margin:18px 0;background:color-mix(in srgb,var(--hato-primary) 3%,transparent)}.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.summary{padding:12px;border-radius:10px;background:color-mix(in srgb,var(--hato-primary) 5%,transparent)}.data-table{width:100%;border-collapse:collapse}.data-table th,.data-table td{padding:12px;border-bottom:1px solid color-mix(in srgb,var(--hato-primary) 10%,transparent);text-align:left}.data-table th{font-size:.82rem;text-transform:uppercase;opacity:.72}.cards{display:grid;gap:10px}.data-card{border:1px solid color-mix(in srgb,var(--hato-primary) 14%,transparent);border-radius:12px;padding:14px}.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin-top:10px}@media(max-width:700px){.desktop-table{display:none}}@media(min-width:701px){.cards{display:none}}</style>
+<div class="list-shell"><header style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h1>🩺 Historia clínica · {{ animal.numero_arete }}</h1><p>{{ animal.nombre_propio|default:"Sin nombre" }} · {{ finca.nombre }}</p></div><div><a href="{% url 'ganado:lista_salud' %}">← Salud</a>{% if puede_gestionar %} · <a href="{% url 'ganado:crear_evento_salud' %}?animal={{ animal.id }}">➕ Registrar evento</a>{% endif %}</div></header><section class="list-card"><h2>🐄 Animal</h2><div class="summary-grid"><div class="summary"><small>Arete</small><br><strong>{{ animal.numero_arete }}</strong></div><div class="summary"><small>Especie</small><br><strong>{{ animal.especie }}</strong></div><div class="summary"><small>Sexo</small><br><strong>{{ animal.get_sexo_display }}</strong></div><div class="summary"><small>Estado</small><br><strong>{{ animal.get_estado_display }}</strong></div></div></section><section class="list-card"><h2>Antecedentes sanitarios</h2>{% if eventos %}<div class="desktop-table"><table class="data-table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Producto / diagnóstico</th><th>Dosis</th><th>Veterinario</th><th>Observaciones</th><th>Acción</th></tr></thead><tbody>{% for evento in eventos %}<tr><td>{{ evento.fecha }}</td><td>{{ evento.get_tipo_display }}</td><td>{{ evento.producto|default:"—" }}</td><td>{{ evento.dosis|default:"—" }}</td><td>{{ evento.nombre_veterinario|default:"—" }}</td><td>{{ evento.observaciones|default:"—" }}</td><td>{% if puede_gestionar %}<a href="{% url 'ganado:editar_evento_salud' evento.id %}">✏️ Editar</a>{% else %}Consulta{% endif %}</td></tr>{% endfor %}</tbody></table></div><div class="cards">{% for evento in eventos %}<article class="data-card"><strong>🩺 {{ evento.get_tipo_display }}</strong><div class="meta"><span>📅 {{ evento.fecha }}</span><span>💊 {{ evento.producto|default:"—" }}</span><span>💉 {{ evento.dosis|default:"—" }}</span><span>👨‍⚕️ {{ evento.nombre_veterinario|default:"—" }}</span></div><p>{{ evento.observaciones|default:"—" }}</p>{% if puede_gestionar %}<a href="{% url 'ganado:editar_evento_salud' evento.id %}">✏️ Editar</a>{% endif %}</article>{% endfor %}</div>{% else %}<p>No hay antecedentes sanitarios registrados para este animal.</p>{% endif %}</section></div>
 {% endblock %}

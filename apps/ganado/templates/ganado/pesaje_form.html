@@ -1,15 +1,6 @@
 {% extends "administrador/base.html" %}
-
 {% block title %}Registrar pesaje · {{ finca.nombre }}{% endblock %}
-
 {% block content %}
-<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;"><div><h1>⚖️ Registrar pesaje</h1><p>{{ finca.nombre }}</p></div><a href="{% url 'ganado:lista_pesajes' %}">← Pesajes</a></div>
-<section><form method="post">{% csrf_token %}{{ form.non_field_errors }}
-<div style="display:grid;gap:12px;max-width:640px;">
-<div>{{ form.animal.label_tag }}<br>{{ form.animal }}{{ form.animal.errors }}</div>
-<div>{{ form.fecha.label_tag }}<br>{{ form.fecha }}{{ form.fecha.errors }}</div>
-<div>{{ form.peso_kg.label_tag }}<br>{{ form.peso_kg }}{{ form.peso_kg.errors }}</div>
-<div>{{ form.observaciones.label_tag }}<br>{{ form.observaciones }}{{ form.observaciones.errors }}</div>
-<div><button type="submit">💾 Guardar pesaje</button> <a href="{% url 'ganado:lista_pesajes' %}">Cancelar</a></div>
-</div></form></section>
+<style>.form-shell{max-width:820px;margin:0 auto}.form-card{border:1px solid color-mix(in srgb,var(--hato-primary) 16%,transparent);border-radius:14px;padding:22px;background:color-mix(in srgb,var(--hato-primary) 3%,transparent);box-shadow:0 2px 8px rgba(0,0,0,.04)}.form-grid{display:grid;gap:14px}.field{display:grid;gap:6px}.field label{font-weight:700}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.context{padding:12px;border-radius:10px;background:color-mix(in srgb,var(--hato-primary) 5%,transparent);margin:14px 0}</style>
+<div class="form-shell"><div class="form-card"><h1>⚖️ Registrar pesaje</h1><div class="context"><strong>Finca:</strong> {{ finca.nombre }}</div><form method="post"><div class="form-grid">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}<div class="field">{{ field.label_tag }}{{ field }}{% for error in field.errors %}<strong>{{ error }}</strong>{% endfor %}</div>{% endfor %}<div class="actions"><button type="submit">💾 Guardar pesaje</button><a href="{% url 'ganado:lista_pesajes' %}">Cancelar</a></div></div></form></div></div>
 {% endblock %}
