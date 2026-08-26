@@ -34,7 +34,6 @@ class AnimalForm(forms.ModelForm):
     def __init__(self, *args, finca=None, **kwargs):
         self.finca = finca
         super().__init__(*args, **kwargs)
-
         animales = Animal.objects.filter(finca=finca).order_by("numero_arete") if finca is not None else Animal.objects.none()
         self.fields["padre"].queryset = animales.filter(sexo="M")
         self.fields["madre"].queryset = animales.filter(sexo="H")
@@ -51,89 +50,34 @@ class IngresoAnimalForm(forms.ModelForm):
         ("compra", "Compra"),
         ("nacimiento_granja", "Nacimiento en la finca"),
     )
+    SALUD_INICIAL_CHOICES = (
+        ("", "No registrar evaluación inicial"),
+        ("examen", "Examen / Revisión"),
+        ("consulta", "Consulta veterinaria"),
+        ("otro", "Otro"),
+    )
 
-    origen = forms.ChoiceField(
-        choices=ORIGEN_CHOICES,
-        widget=forms.RadioSelect,
-        initial="compra",
-        label="¿Cómo ingresa el animal?",
-    )
-    padre = forms.ModelChoiceField(
-        queryset=Animal.objects.none(),
-        required=False,
-        empty_label="Sin padre registrado",
-        label="Padre (toro)",
-    )
-    madre = forms.ModelChoiceField(
-        queryset=Animal.objects.none(),
-        required=False,
-        empty_label="Sin madre registrada",
-        label="Madre (vaca)",
-    )
-    potrero_inicial = forms.ModelChoiceField(
-        queryset=Potrero.objects.none(),
-        required=False,
-        empty_label="Sin ubicación inicial",
-        label="Ubicación inicial",
-    )
-    peso_inicial = forms.DecimalField(
-        required=False,
-        min_value=0.01,
-        max_digits=7,
-        decimal_places=2,
-        label="Peso inicial (kg)",
-    )
+    origen = forms.ChoiceField(choices=ORIGEN_CHOICES, widget=forms.RadioSelect, initial="compra", label="¿Cómo ingresa el animal?")
+    padre = forms.ModelChoiceField(queryset=Animal.objects.none(), required=False, empty_label="Sin padre registrado", label="Padre (toro)")
+    madre = forms.ModelChoiceField(queryset=Animal.objects.none(), required=False, empty_label="Sin madre registrada", label="Madre (vaca)")
+    potrero_inicial = forms.ModelChoiceField(queryset=Potrero.objects.none(), required=False, empty_label="Sin ubicación inicial", label="Ubicación inicial")
+    peso_inicial = forms.DecimalField(required=False, min_value=0.01, max_digits=7, decimal_places=2, label="Peso inicial (kg)")
     proveedor = forms.CharField(max_length=200, required=False, label="Proveedor")
-    fecha_compra = forms.DateField(
-        required=False,
-        widget=forms.DateInput(attrs={"type": "date"}),
-        label="Fecha de compra",
-    )
-    documento_compra = forms.CharField(
-        max_length=100,
-        required=False,
-        label="Factura / Documento",
-    )
-    precio_individual = forms.DecimalField(
-        required=False,
-        min_value=0,
-        max_digits=14,
-        decimal_places=2,
-        label="Precio individual",
-    )
-    fecha_parto = forms.DateTimeField(
-        required=False,
-        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
-        label="Fecha y hora del parto",
-    )
-    tipo_parto = forms.ChoiceField(
-        required=False,
-        choices=(
-            ("normal", "Normal"),
-            ("distocico", "Distócico"),
-            ("cesarea", "Cesárea"),
-        ),
-        label="Tipo de parto",
-    )
+    fecha_compra = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date"}), label="Fecha de compra")
+    documento_compra = forms.CharField(max_length=100, required=False, label="Factura / Documento")
+    precio_individual = forms.DecimalField(required=False, min_value=0, max_digits=14, decimal_places=2, label="Precio individual")
+    fecha_parto = forms.DateTimeField(required=False, widget=forms.DateTimeInput(attrs={"type": "datetime-local"}), label="Fecha y hora del parto")
+    tipo_parto = forms.ChoiceField(required=False, choices=(("normal", "Normal"), ("distocico", "Distócico"), ("cesarea", "Cesárea")), label="Tipo de parto")
+    salud_inicial_tipo = forms.ChoiceField(required=False, choices=SALUD_INICIAL_CHOICES, label="Evaluación veterinaria inicial")
+    salud_inicial_fecha = forms.DateTimeField(required=False, widget=forms.DateTimeInput(attrs={"type": "datetime-local"}), label="Fecha de evaluación")
+    salud_inicial_veterinario = forms.CharField(max_length=200, required=False, label="Veterinario")
+    salud_inicial_observaciones = forms.CharField(required=False, widget=forms.Textarea(attrs={"rows": 3}), label="Observación sanitaria inicial")
 
     class Meta:
         model = Animal
         fields = (
-            "numero_arete",
-            "nombre_propio",
-            "fecha_nacimiento",
-            "sexo",
-            "especie",
-            "raza_declarada",
-            "categoria",
-            "microchip",
-            "tatuaje",
-            "registro_genealogico",
-            "padre",
-            "madre",
-            "estado",
-            "observaciones",
-            "is_active",
+            "numero_arete", "nombre_propio", "fecha_nacimiento", "sexo", "especie", "raza_declarada", "categoria",
+            "microchip", "tatuaje", "registro_genealogico", "padre", "madre", "estado", "observaciones", "is_active",
         )
         widgets = {
             "fecha_nacimiento": forms.DateInput(attrs={"type": "date"}),
@@ -146,10 +90,10 @@ class IngresoAnimalForm(forms.ModelForm):
         animales = Animal.objects.filter(finca=finca).order_by("numero_arete") if finca is not None else Animal.objects.none()
         self.fields["padre"].queryset = animales.filter(sexo="M")
         self.fields["madre"].queryset = animales.filter(sexo="H")
-        self.fields["potrero_inicial"].queryset = (
-            Potrero.objects.filter(finca=finca, is_active=True).order_by("nombre")
-            if finca is not None else Potrero.objects.none()
-        )
+        self.fields["potrero_inicial"].queryset = Potrero.objects.filter(finca=finca, is_active=True).order_by("nombre") if finca is not None else Potrero.objects.none()
+        default_health_date = timezone.localtime().strftime("%Y-%m-%dT%H:%M")
+        if not self.initial.get("salud_inicial_fecha"):
+            self.initial["salud_inicial_fecha"] = default_health_date
 
     def clean(self):
         cleaned = super().clean()
@@ -178,6 +122,11 @@ class IngresoAnimalForm(forms.ModelForm):
                 self.add_error("proveedor", "La compra requiere proveedor.")
             if not cleaned.get("fecha_compra"):
                 self.add_error("fecha_compra", "La compra requiere fecha.")
+
+        salud_tipo = cleaned.get("salud_inicial_tipo")
+        salud_fecha = cleaned.get("salud_inicial_fecha")
+        if salud_tipo and not salud_fecha:
+            self.add_error("salud_inicial_fecha", "La evaluación sanitaria requiere fecha.")
 
         return cleaned
 
