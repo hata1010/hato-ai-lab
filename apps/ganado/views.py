@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -17,6 +18,7 @@ from .services_ingreso import registrar_ingreso_compra, registrar_ingreso_nacimi
 
 
 ROLES_GESTION_ANIMALES = {"superusuario", "propietario", "administrador"}
+ANIMALES_POR_PAGINA = 25
 
 
 def _finca_activa_o_denegar(request):
@@ -52,12 +54,22 @@ def lista_animales(request):
     if sexo:
         animales = animales.filter(sexo=sexo)
 
+    animales = animales.distinct()
+    paginator = Paginator(animales, ANIMALES_POR_PAGINA)
+    pagina = paginator.get_page(request.GET.get("page", 1))
+
+    parametros_paginacion = request.GET.copy()
+    parametros_paginacion.pop("page", None)
+
     return render(
         request,
         "ganado/animales_lista.html",
         {
             "finca": finca,
-            "animales": animales.distinct(),
+            "animales": pagina.object_list,
+            "pagina": pagina,
+            "paginator": paginator,
+            "parametros_paginacion": parametros_paginacion.urlencode(),
             "puede_gestionar": _puede_gestionar_animales(request, finca),
             "consulta": consulta,
             "estado_actual": estado,
@@ -178,9 +190,8 @@ def editar_animal(request, animal_id):
         "ganado/animal_editar.html",
         {
             "finca": finca,
-            "form": form,
             "animal": animal,
+            "form": form,
             "rol": obtener_rol_usuario_finca(request.user, finca),
-            "puede_gestionar": True,
         },
     )
