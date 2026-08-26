@@ -72,7 +72,7 @@
     </section>
 
     <section>
-        <h2>5. Ingreso físico</h2>
+        <h2>5. Peso y ubicación inicial</h2>
         <div style="margin:12px 0;">
             <label for="{{ form.peso_inicial.id_for_label }}"><strong>{{ form.peso_inicial.label }}</strong></label><br>
             {{ form.peso_inicial }}
@@ -82,6 +82,30 @@
             <label for="{{ form.potrero_inicial.id_for_label }}"><strong>{{ form.potrero_inicial.label }}</strong></label><br>
             {{ form.potrero_inicial }}
             {% for error in form.potrero_inicial.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
+        </div>
+    </section>
+
+    <section>
+        <h2>6. Evaluación veterinaria inicial</h2>
+        <div style="margin:12px 0;">
+            <label for="{{ form.salud_inicial_tipo.id_for_label }}"><strong>{{ form.salud_inicial_tipo.label }}</strong></label><br>
+            {{ form.salud_inicial_tipo }}
+            {% for error in form.salud_inicial_tipo.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
+        </div>
+        <div style="margin:12px 0;">
+            <label for="{{ form.salud_inicial_fecha.id_for_label }}"><strong>{{ form.salud_inicial_fecha.label }}</strong></label><br>
+            {{ form.salud_inicial_fecha }}
+            {% for error in form.salud_inicial_fecha.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
+        </div>
+        <div style="margin:12px 0;">
+            <label for="{{ form.salud_inicial_veterinario.id_for_label }}"><strong>{{ form.salud_inicial_veterinario.label }}</strong></label><br>
+            {{ form.salud_inicial_veterinario }}
+            {% for error in form.salud_inicial_veterinario.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
+        </div>
+        <div style="margin:12px 0;">
+            <label for="{{ form.salud_inicial_observaciones.id_for_label }}"><strong>{{ form.salud_inicial_observaciones.label }}</strong></label><br>
+            {{ form.salud_inicial_observaciones }}
+            {% for error in form.salud_inicial_observaciones.errors %}<div style="color:#b91c1c;">{{ error }}</div>{% endfor %}
         </div>
     </section>
 
