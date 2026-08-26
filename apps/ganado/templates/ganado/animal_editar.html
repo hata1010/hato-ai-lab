@@ -1,0 +1,179 @@
+{% extends "administrador/base.html" %}
+
+{% block title %}Editar animal · {{ animal.numero_arete }} · {{ finca.nombre }}{% endblock %}
+
+{% block content %}
+<div class="animal-edit-page">
+    <style>
+        .animal-edit-page{max-width:1100px;margin:0 auto;padding:24px;background:#f3f4f6;}
+        .animal-edit-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:22px;}
+        .animal-edit-title{margin:0;color:#1f2937;font-size:30px;line-height:1.1;font-weight:800;}
+        .animal-edit-title .arete{color:#2563eb;}
+        .animal-edit-meta{margin:6px 0 0;color:#6b7280;font-size:14px;}
+        .animal-edit-actions{display:flex;gap:10px;}
+        .animal-edit-btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:9px;padding:10px 16px;font-weight:700;text-decoration:none;cursor:pointer;}
+        .animal-edit-btn-secondary{background:#e5e7eb;color:#374151;}
+        .animal-edit-btn-primary{background:#2563eb;color:#fff;}
+        .animal-edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;}
+        .animal-edit-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 2px 8px rgba(15,23,42,.05);padding:20px;}
+        .animal-edit-card h2{margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid #eef2f7;color:#111827;font-size:17px;font-weight:800;}
+        .animal-edit-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+        .animal-edit-field-full{grid-column:1/-1;}
+        .animal-edit-field label{display:block;margin-bottom:6px;color:#374151;font-size:13px;font-weight:700;}
+        .animal-edit-field input,.animal-edit-field select,.animal-edit-field textarea{box-sizing:border-box;width:100%;border:1px solid #d1d5db;border-radius:9px;padding:10px 11px;background:#fff;color:#1f2937;font-size:14px;}
+        .animal-edit-field textarea{resize:vertical;}
+        .animal-edit-errors{margin-top:5px;color:#b91c1c;font-size:12px;}
+        .animal-edit-check{display:flex;align-items:center;gap:9px;margin-top:4px;padding:12px;border:1px solid #e5e7eb;border-radius:9px;background:#f9fafb;}
+        .animal-edit-check input{width:18px;height:18px;}
+        .animal-edit-history{margin-top:20px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;}
+        .animal-edit-history-head{padding:14px 18px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;}
+        .animal-edit-history-head h2{margin:0;color:#0f172a;font-size:17px;font-weight:800;}
+        .animal-edit-history-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:18px;}
+        .animal-edit-links{display:flex;flex-wrap:wrap;gap:8px;}
+        .animal-edit-link{display:inline-flex;align-items:center;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;font-size:12px;font-weight:700;text-decoration:none;}
+        .animal-edit-nonfield{margin-bottom:14px;padding:10px 12px;border:1px solid #fecaca;border-radius:8px;background:#fef2f2;color:#991b1b;font-size:13px;}
+        @media (max-width:760px){
+            .animal-edit-page{padding:14px;}
+            .animal-edit-header,.animal-edit-history-body{grid-template-columns:1fr;display:grid;}
+            .animal-edit-actions{justify-content:flex-start;}
+            .animal-edit-grid{grid-template-columns:1fr;}
+        }
+        @media (max-width:560px){
+            .animal-edit-fields{grid-template-columns:1fr;}
+            .animal-edit-title{font-size:24px;}
+            .animal-edit-actions{flex-direction:column;align-items:stretch;}
+        }
+    </style>
+
+    <div class="animal-edit-header">
+        <div>
+            <h1 class="animal-edit-title">🐄 Editar Animal <span class="arete">#{{ animal.numero_arete }}</span></h1>
+            <p class="animal-edit-meta">Finca: {{ finca.nombre }} · Rol: {{ rol|title }}</p>
+        </div>
+        <div class="animal-edit-actions">
+            <a href="{% url 'ganado:detalle_animal' animal.id %}" class="animal-edit-btn animal-edit-btn-secondary">Cancelar</a>
+            <button type="submit" form="animal-edit-form" class="animal-edit-btn animal-edit-btn-primary">💾 Guardar Cambios</button>
+        </div>
+    </div>
+
+    <form id="animal-edit-form" method="post">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="animal-edit-nonfield">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="animal-edit-grid">
+            <section class="animal-edit-card">
+                <h2>1. Identificación Principal</h2>
+                <div class="animal-edit-fields">
+                    {% for field_name in "numero_arete,nombre_propio,sexo,categoria"|split:"," %}
+                        {% with field=form|dict_get:field_name %}
+                        <div class="animal-edit-field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                            {{ field }}
+                            {% for error in field.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
+                        </div>
+                        {% endwith %}
+                    {% endfor %}
+                    <div class="animal-edit-field animal-edit-field-full">
+                        <label for="{{ form.estado.id_for_label }}">{{ form.estado.label }}</label>
+                        {{ form.estado }}
+                        {% for error in form.estado.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="animal-edit-card">
+                <h2>2. Biología y Genética</h2>
+                <div class="animal-edit-fields">
+                    {% for field_name in "especie,raza_declarada"|split:"," %}
+                        {% with field=form|dict_get:field_name %}
+                        <div class="animal-edit-field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
+                        </div>
+                        {% endwith %}
+                    {% endfor %}
+                    <div class="animal-edit-field animal-edit-field-full">
+                        <label for="{{ form.fecha_nacimiento.id_for_label }}">{{ form.fecha_nacimiento.label }}</label>
+                        {{ form.fecha_nacimiento }}
+                        {% for error in form.fecha_nacimiento.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
+                    </div>
+                    {% for field_name in "padre,madre"|split:"," %}
+                        {% with field=form|dict_get:field_name %}
+                        <div class="animal-edit-field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
+                        </div>
+                        {% endwith %}
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="animal-edit-card">
+                <h2>3. Registros y Marcas</h2>
+                <div class="animal-edit-fields" style="grid-template-columns:1fr;">
+                    {% for field_name in "microchip,tatuaje,registro_genealogico"|split:"," %}
+                        {% with field=form|dict_get:field_name %}
+                        <div class="animal-edit-field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
+                        </div>
+                        {% endwith %}
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="animal-edit-card">
+                <h2>4. Estado y Observaciones</h2>
+                <div class="animal-edit-fields" style="grid-template-columns:1fr;">
+                    <div class="animal-edit-field">
+                        <label for="{{ form.observaciones.id_for_label }}">Notas / Detalles adicionales</label>
+                        {{ form.observaciones }}
+                        {% for error in form.observaciones.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="animal-edit-check">
+                        {{ form.is_active }}
+                        <label for="{{ form.is_active.id_for_label }}">Registro Activo en el Sistema</label>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </form>
+
+    <section class="animal-edit-history">
+        <div class="animal-edit-history-head">
+            <h2>🔗 Historia y navegación del animal</h2>
+        </div>
+        <div class="animal-edit-history-body">
+            <div>
+                <strong>Ficha relacionada</strong>
+                <p style="margin:6px 0 0;color:#64748b;font-size:13px;">Los procesos históricos permanecen fuera de esta edición.</p>
+            </div>
+            <div class="animal-edit-links">
+                <a class="animal-edit-link" href="{% url 'ganado:detalle_animal' animal.id %}">📋 Ficha General</a>
+                <a class="animal-edit-link" href="{% url 'ganado:historia_salud_animal' animal.id %}">🩺 Salud</a>
+                <a class="animal-edit-link" href="{% url 'ganado:historial_movilidad_animal' animal.id %}">📍 Movilidad</a>
+                <a class="animal-edit-link" href="{% url 'ganado:historial_pesajes_animal' animal.id %}">⚖️ Pesajes</a>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const estado = document.getElementById("id_estado");
+        const activo = document.getElementById("id_is_active");
+        if (!estado || !activo) return;
+        const estadosInactivos = new Set(["vendido", "muerto", "descartado", "trasladado"]);
+        const sincronizar = () => {
+            if (estadosInactivos.has(estado.value)) activo.checked = false;
+        };
+        estado.addEventListener("change", sincronizar);
+        sincronizar();
+    });
+</script>
+{% endblock %}
