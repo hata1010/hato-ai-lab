@@ -10,7 +10,8 @@ from apps.core.tenant import (
     verificar_acceso_finca,
 )
 
-from .forms import AnimalForm, IngresoAnimalForm
+from .animal_edit_form import AnimalEditForm
+from .forms import IngresoAnimalForm
 from .models import Animal
 from .services_ingreso import registrar_ingreso_compra, registrar_ingreso_nacimiento
 
@@ -157,8 +158,13 @@ def editar_animal(request, animal_id):
     if not _puede_gestionar_animales(request, finca):
         raise PermissionDenied("Tu rol no permite modificar animales.")
 
-    animal = get_object_or_404(Animal, id=animal_id, finca=finca)
-    form = AnimalForm(request.POST or None, instance=animal, finca=finca)
+    animal = get_object_or_404(
+        Animal.objects.select_related("especie", "raza_declarada", "padre", "madre"),
+        id=animal_id,
+        finca=finca,
+    )
+
+    form = AnimalEditForm(request.POST or None, instance=animal, finca=finca)
 
     if request.method == "POST" and form.is_valid():
         animal = form.save(commit=False)
@@ -169,6 +175,12 @@ def editar_animal(request, animal_id):
 
     return render(
         request,
-        "ganado/animal_form.html",
-        {"finca": finca, "form": form, "animal": animal, "modo": "editar", "rol": obtener_rol_usuario_finca(request.user, finca)},
+        "ganado/animal_editar.html",
+        {
+            "finca": finca,
+            "form": form,
+            "animal": animal,
+            "rol": obtener_rol_usuario_finca(request.user, finca),
+            "puede_gestionar": True,
+        },
     )
