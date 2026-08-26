@@ -90,7 +90,26 @@ METRICAS_V1 = {
         estrategia={"modo":"pipeline","pasos":[{"funcion":"DURACION_LACTANCIA"}]},
         descripcion="Días entre inicio y fecha de secado de una lactancia cerrada.",
     ),
+    "ANIMALES_NACIDOS": DefinicionMetrica(
+        codigo="ANIMALES_NACIDOS", nombre="Animales nacidos", tipo="filtrada",
+        familia="poblacion", unidad="animales", precision_decimales=0,
+        estrategia={"modo":"pipeline","pasos":[
+            {"funcion":"FILTRO_PROCEDENCIA","parametros":{"valor":"nacimiento_granja"}},
+            {"funcion":"CONTEO"},
+        ]},
+        descripcion="Cuenta los animales cuya procedencia registrada es nacimiento en la granja.",
+    ),
+    "ANIMALES_ADQUIRIDOS": DefinicionMetrica(
+        codigo="ANIMALES_ADQUIRIDOS", nombre="Animales adquiridos", tipo="filtrada",
+        familia="poblacion", unidad="animales", precision_decimales=0,
+        estrategia={"modo":"pipeline","pasos":[
+            {"funcion":"FILTRO_PROCEDENCIA","parametros":{"valor":"compra"}},
+            {"funcion":"CONTEO"},
+        ]},
+        descripcion="Cuenta los animales cuya procedencia registrada es compra.",
+    ),
 }
+
 
 def obtener_metrica_v1(codigo: str) -> DefinicionMetrica:
     try:
