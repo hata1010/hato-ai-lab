@@ -1,6 +1,124 @@
 {% extends "administrador/base.html" %}
+
 {% block title %}{% if modo == 'editar' %}Editar evento{% else %}Registrar evento{% endif %} · Salud{% endblock %}
+
 {% block content %}
-<style>.form-shell{max-width:820px;margin:0 auto}.form-card{border:1px solid color-mix(in srgb,var(--hato-primary) 16%,transparent);border-radius:14px;padding:22px;background:color-mix(in srgb,var(--hato-primary) 3%,transparent);box-shadow:0 2px 8px rgba(0,0,0,.04)}.context{padding:12px;border-radius:10px;background:color-mix(in srgb,var(--hato-primary) 5%,transparent);margin:14px 0}.form-grid{display:grid;gap:14px}.field{display:grid;gap:6px}.field label{font-weight:700}.field textarea{min-height:90px}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.nonfield{padding:10px;border-radius:9px}</style>
-<div class="form-shell"><div class="form-card"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h1>🩺 {% if modo == "editar" %}Editar evento de salud{% else %}Registrar evento de salud{% endif %}</h1><p>{{ finca.nombre }}</p></div><a href="{% if evento %}{% url 'ganado:historia_salud_animal' evento.animal_id %}{% else %}{% url 'ganado:lista_salud' %}{% endif %}">← Volver</a></div>{% if evento %}<div class="context"><strong>Animal:</strong> {{ evento.animal }}</div>{% endif %}<form method="post"><div class="form-grid">{% csrf_token %}{% if form.non_field_errors %}<div class="nonfield">{{ form.non_field_errors }}</div>{% endif %}{% for field in form %}<div class="field">{{ field.label_tag }}{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<strong>{{ error }}</strong>{% endfor %}</div>{% endfor %}<div class="actions"><button type="submit">💾 {% if modo == "editar" %}Guardar cambios{% else %}Registrar evento{% endif %}</button><a href="{% if evento %}{% url 'ganado:historia_salud_animal' evento.animal_id %}{% else %}{% url 'ganado:lista_salud' %}{% endif %}">Cancelar</a></div></div></form></div></div>
+<div class="p-6 max-w-5xl mx-auto font-sans">
+    
+    <!-- Encabezado y Navegación -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-800 flex items-center gap-2">
+                🩺 {% if modo == "editar" %}Editar Evento de Salud{% else %}Registrar Evento de Salud{% endif %}
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">Finca activa: <strong class="text-slate-700">{{ finca.nombre }}</strong></p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% if evento %}{% url 'ganado:historia_salud_animal' evento.animal_id %}{% else %}{% url 'ganado:lista_salud' %}{% endif %}" 
+               class="bg-slate-200 text-slate-700 px-5 py-2 rounded-lg hover:bg-slate-300 font-medium transition flex items-center gap-2">
+                ← Volver
+            </a>
+            <button type="submit" form="salud-form" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-medium shadow-sm transition flex items-center gap-2">
+                💾 {% if modo == "editar" %}Guardar cambios{% else %}Registrar evento{% endif %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Formulario principal con tarjetas -->
+    <form id="salud-form" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% csrf_token %}
+        
+        <!-- Alerta de Errores Globales -->
+        {% if form.non_field_errors %}
+        <div class="col-span-1 md:col-span-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <!-- TARJETA 1: Detalles del Evento -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div class="border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                <span class="text-blue-600 font-bold">1.</span>
+                <h2 class="text-lg font-bold text-slate-800">Detalles del Evento</h2>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1 uppercase tracking-wide">{{ form.animal.label }} *</label>
+                    {{ form.animal }}
+                    {% if form.animal.help_text %}<p class="text-xs text-slate-400 mt-1">{{ form.animal.help_text }}</p>{% endif %}
+                    <div class="text-red-500 text-xs mt-1 font-medium">{{ form.animal.errors }}</div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1 uppercase tracking-wide">{{ form.tipo.label }} *</label>
+                    {{ form.tipo }}
+                    <div class="text-red-500 text-xs mt-1 font-medium">{{ form.tipo.errors }}</div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1 uppercase tracking-wide">{{ form.fecha.label }} *</label>
+                    {{ form.fecha }}
+                    <div class="text-red-500 text-xs mt-1 font-medium">{{ form.fecha.errors }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TARJETA 2: Aplicación Médica -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div class="border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                <span class="text-teal-600 font-bold">2.</span>
+                <h2 class="text-lg font-bold text-slate-800">Aplicación Médica (Insumos)</h2>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1 uppercase tracking-wide">{{ form.producto.label }}</label>
+                    {{ form.producto }}
+                    {% if form.producto.help_text %}<p class="text-xs text-slate-400 mt-1">{{ form.producto.help_text }}</p>{% endif %}
+                    <div class="text-red-500 text-xs mt-1 font-medium">{{ form.producto.errors }}</div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1 uppercase tracking-wide">{{ form.dosis.label }}</label>
+                    {{ form.dosis }}
+                    <div class="text-red-500 text-xs mt-1 font-medium">{{ form.dosis.errors }}</div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1 uppercase tracking-wide">Médico / Veterinario</label>
+                    {{ form.nombre_veterinario }}
+                    <div class="text-red-500 text-xs mt-1 font-medium">{{ form.nombre_veterinario.errors }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TARJETA 3: Observaciones Clínicas -->
+        <div class="col-span-1 md:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div class="border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                <span class="text-indigo-600 font-bold">3.</span>
+                <h2 class="text-lg font-bold text-slate-800">Notas y Observaciones Clínicas</h2>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">{{ form.observaciones.label }}</label>
+                {{ form.observaciones }}
+                <div class="text-red-500 text-xs mt-1 font-medium">{{ form.observaciones.errors }}</div>
+            </div>
+        </div>
+        
+    </form>
+</div>
+
+<!-- Script para inyectar clases Tailwind a los widgets nativos de Django -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const formInputs = document.querySelectorAll('#salud-form input, #salud-form select, #salud-form textarea');
+        formInputs.forEach(input => {
+            if (input.type !== 'hidden') {
+                input.classList.add('w-full', 'border', 'border-slate-300', 'rounded-lg', 'px-3', 'py-2', 'focus:ring-blue-500', 'focus:border-blue-500', 'text-slate-700');
+            }
+        });
+    });
+</script>
 {% endblock %}
