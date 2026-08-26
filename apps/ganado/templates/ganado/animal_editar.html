@@ -34,7 +34,8 @@
         .animal-edit-nonfield{margin-bottom:14px;padding:10px 12px;border:1px solid #fecaca;border-radius:8px;background:#fef2f2;color:#991b1b;font-size:13px;}
         @media (max-width:760px){
             .animal-edit-page{padding:14px;}
-            .animal-edit-header,.animal-edit-history-body{grid-template-columns:1fr;display:grid;}
+            .animal-edit-header{display:grid;grid-template-columns:1fr;}
+            .animal-edit-history-body{grid-template-columns:1fr;}
             .animal-edit-actions{justify-content:flex-start;}
             .animal-edit-grid{grid-template-columns:1fr;}
         }
@@ -66,92 +67,51 @@
             <section class="animal-edit-card">
                 <h2>1. Identificación Principal</h2>
                 <div class="animal-edit-fields">
-                    {% for field_name in "numero_arete,nombre_propio,sexo,categoria"|split:"," %}
-                        {% with field=form|dict_get:field_name %}
-                        <div class="animal-edit-field">
-                            <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
-                            {{ field }}
-                            {% for error in field.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
-                        </div>
-                        {% endwith %}
-                    {% endfor %}
-                    <div class="animal-edit-field animal-edit-field-full">
-                        <label for="{{ form.estado.id_for_label }}">{{ form.estado.label }}</label>
-                        {{ form.estado }}
-                        {% for error in form.estado.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
-                    </div>
+                    <div class="animal-edit-field"><label for="{{ form.numero_arete.id_for_label }}">{{ form.numero_arete.label }} *</label>{{ form.numero_arete }}{% for error in form.numero_arete.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
+                    <div class="animal-edit-field"><label for="{{ form.nombre_propio.id_for_label }}">{{ form.nombre_propio.label }}</label>{{ form.nombre_propio }}{% for error in form.nombre_propio.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
+                    <div class="animal-edit-field"><label for="{{ form.sexo.id_for_label }}">{{ form.sexo.label }} *</label>{{ form.sexo }}{% for error in form.sexo.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
+                    <div class="animal-edit-field"><label for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }}</label>{{ form.categoria }}{% for error in form.categoria.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
+                    <div class="animal-edit-field animal-edit-field-full"><label for="{{ form.estado.id_for_label }}">{{ form.estado.label }}</label>{{ form.estado }}{% for error in form.estado.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
                 </div>
             </section>
 
             <section class="animal-edit-card">
                 <h2>2. Biología y Genética</h2>
                 <div class="animal-edit-fields">
-                    {% for field_name in "especie,raza_declarada"|split:"," %}
-                        {% with field=form|dict_get:field_name %}
-                        <div class="animal-edit-field">
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% for error in field.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
-                        </div>
-                        {% endwith %}
-                    {% endfor %}
-                    <div class="animal-edit-field animal-edit-field-full">
-                        <label for="{{ form.fecha_nacimiento.id_for_label }}">{{ form.fecha_nacimiento.label }}</label>
-                        {{ form.fecha_nacimiento }}
-                        {% for error in form.fecha_nacimiento.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
-                    </div>
-                    {% for field_name in "padre,madre"|split:"," %}
-                        {% with field=form|dict_get:field_name %}
-                        <div class="animal-edit-field">
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% for error in field.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
-                        </div>
-                        {% endwith %}
-                    {% endfor %}
+                    <div class="animal-edit-field"><label for="{{ form.especie.id_for_label }}">{{ form.especie.label }}</label>{{ form.especie }}{% for error in form.especie.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
+                    <div class="animal-edit-field"><label for="{{ form.raza_declarada.id_for_label }}">{{ form.raza_declarada.label }}</label>{{ form.raza_declarada }}{% for error in form.raza_declarada.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
+                    <div class="animal-edit-field animal-edit-field-full"><label for="{{ form.fecha_nacimiento.id_for_label }}">{{ form.fecha_nacimiento.label }}</label>{{ form.fecha_nacimiento }}{% for error in form.fecha_nacimiento.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
+                    <div class="animal-edit-field"><label for="{{ form.padre.id_for_label }}">{{ form.padre.label }}</label>{{ form.padre }}{% for error in form.padre.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
+                    <div class="animal-edit-field"><label for="{{ form.madre.id_for_label }}">{{ form.madre.label }}</label>{{ form.madre }}{% for error in form.madre.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
                 </div>
             </section>
 
             <section class="animal-edit-card">
                 <h2>3. Registros y Marcas</h2>
                 <div class="animal-edit-fields" style="grid-template-columns:1fr;">
-                    {% for field_name in "microchip,tatuaje,registro_genealogico"|split:"," %}
-                        {% with field=form|dict_get:field_name %}
-                        <div class="animal-edit-field">
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% for error in field.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
-                        </div>
-                        {% endwith %}
-                    {% endfor %}
+                    <div class="animal-edit-field"><label for="{{ form.microchip.id_for_label }}">{{ form.microchip.label }}</label>{{ form.microchip }}{% for error in form.microchip.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
+                    <div class="animal-edit-field"><label for="{{ form.tatuaje.id_for_label }}">{{ form.tatuaje.label }}</label>{{ form.tatuaje }}{% for error in form.tatuaje.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
+                    <div class="animal-edit-field"><label for="{{ form.registro_genealogico.id_for_label }}">{{ form.registro_genealogico.label }}</label>{{ form.registro_genealogico }}{% for error in form.registro_genealogico.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
                 </div>
             </section>
 
             <section class="animal-edit-card">
                 <h2>4. Estado y Observaciones</h2>
                 <div class="animal-edit-fields" style="grid-template-columns:1fr;">
-                    <div class="animal-edit-field">
-                        <label for="{{ form.observaciones.id_for_label }}">Notas / Detalles adicionales</label>
-                        {{ form.observaciones }}
-                        {% for error in form.observaciones.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
-                    </div>
-                    <div class="animal-edit-check">
-                        {{ form.is_active }}
-                        <label for="{{ form.is_active.id_for_label }}">Registro Activo en el Sistema</label>
-                    </div>
+                    <div class="animal-edit-field"><label for="{{ form.observaciones.id_for_label }}">Notas / Detalles adicionales</label>{{ form.observaciones }}{% for error in form.observaciones.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}</div>
+                    <div class="animal-edit-check">{{ form.is_active }}<label for="{{ form.is_active.id_for_label }}">Registro Activo en el Sistema</label></div>
+                    {% for error in form.is_active.errors %}<div class="animal-edit-errors">{{ error }}</div>{% endfor %}
                 </div>
             </section>
         </div>
     </form>
 
     <section class="animal-edit-history">
-        <div class="animal-edit-history-head">
-            <h2>🔗 Historia y navegación del animal</h2>
-        </div>
+        <div class="animal-edit-history-head"><h2>🔗 Historia y navegación del animal</h2></div>
         <div class="animal-edit-history-body">
             <div>
-                <strong>Ficha relacionada</strong>
-                <p style="margin:6px 0 0;color:#64748b;font-size:13px;">Los procesos históricos permanecen fuera de esta edición.</p>
+                <strong>Procesos relacionados</strong>
+                <p style="margin:6px 0 0;color:#64748b;font-size:13px;">La edición cambia la ficha del animal. Los historiales se consultan desde sus módulos.</p>
             </div>
             <div class="animal-edit-links">
                 <a class="animal-edit-link" href="{% url 'ganado:detalle_animal' animal.id %}">📋 Ficha General</a>
@@ -169,9 +129,7 @@
         const activo = document.getElementById("id_is_active");
         if (!estado || !activo) return;
         const estadosInactivos = new Set(["vendido", "muerto", "descartado", "trasladado"]);
-        const sincronizar = () => {
-            if (estadosInactivos.has(estado.value)) activo.checked = false;
-        };
+        const sincronizar = () => { if (estadosInactivos.has(estado.value)) activo.checked = false; };
         estado.addEventListener("change", sincronizar);
         sincronizar();
     });
