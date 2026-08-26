@@ -5,23 +5,22 @@
 {% block content %}
 <h1>🐄 Registrar ingreso de animal</h1>
 <p><strong>Finca:</strong> {{ finca.nombre }} · <strong>Rol:</strong> {{ rol }}</p>
-<p>El sistema creará el animal y las relaciones iniciales correspondientes al tipo de ingreso seleccionado.</p>
+<p>El sistema registra el animal y crea las relaciones iniciales según el tipo de ingreso.</p>
 
 <form method="post" id="ingreso-animal-form">
     {% csrf_token %}
     {{ form.non_field_errors }}
 
     <section>
-        <h2>1. Origen del ingreso</h2>
+        <h2>1. Origen</h2>
         {{ form.origen.errors }}
         {{ form.origen }}
     </section>
 
     <section>
-        <h2>2. Identidad del animal</h2>
-        {% for name in "numero_arete,nombre_propio,fecha_nacimiento,sexo,especie,raza_declarada,categoria,microchip,tatuaje,registro_genealogico,estado,observaciones,is_active".split "," %}{% endfor %}
-        {% for field in form %}
-            {% if field.name in "numero_arete nombre_propio fecha_nacimiento sexo especie raza_declarada categoria microchip tatuaje registro_genealogico estado observaciones is_active" %}
+        <h2>2. Identidad</h2>
+        {% for field in form.visible_fields %}
+            {% if field.name == "numero_arete" or field.name == "nombre_propio" or field.name == "fecha_nacimiento" or field.name == "sexo" or field.name == "especie" or field.name == "raza_declarada" or field.name == "categoria" or field.name == "microchip" or field.name == "tatuaje" or field.name == "registro_genealogico" or field.name == "estado" or field.name == "observaciones" or field.name == "is_active" %}
                 <div style="margin:12px 0;">
                     <label for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong></label><br>
                     {{ field }}
@@ -33,7 +32,7 @@
 
     <section>
         <h2>3. Filiación</h2>
-        <p>El padre se selecciona únicamente entre machos (toros) y la madre únicamente entre hembras (vacas) de la finca.</p>
+        <p>Padre = toro. Madre = vaca. Ambos se filtran por sexo y finca.</p>
         <div style="margin:12px 0;">
             <label for="{{ form.padre.id_for_label }}"><strong>{{ form.padre.label }}</strong></label><br>
             {{ form.padre }}
@@ -48,8 +47,8 @@
 
     <section id="compra-section">
         <h2>4A. Compra / adquisición</h2>
-        {% for field in form %}
-            {% if field.name in "proveedor fecha_compra documento_compra precio_individual" %}
+        {% for field in form.visible_fields %}
+            {% if field.name == "proveedor" or field.name == "fecha_compra" or field.name == "documento_compra" or field.name == "precio_individual" %}
                 <div style="margin:12px 0;">
                     <label for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong></label><br>
                     {{ field }}
@@ -61,8 +60,8 @@
 
     <section id="nacimiento-section">
         <h2>4B. Nacimiento / parto</h2>
-        {% for field in form %}
-            {% if field.name in "fecha_parto tipo_parto" %}
+        {% for field in form.visible_fields %}
+            {% if field.name == "fecha_parto" or field.name == "tipo_parto" %}
                 <div style="margin:12px 0;">
                     <label for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong></label><br>
                     {{ field }}
