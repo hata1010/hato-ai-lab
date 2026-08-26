@@ -4,6 +4,7 @@ from .models import (
     Adquisicion,
     AdquisicionAnimal,
     Animal,
+    EventoSalud,
     MovimientoAnimal,
     PesajeAnimal,
     ProcedenciaAnimal,
@@ -11,8 +12,20 @@ from .models import (
 from .models_reproduccion import CriaNacimiento, EventoReproductivo
 
 
+def _crear_evaluacion_salud(*, animal, tipo, fecha, veterinario="", observaciones=""):
+    if not tipo:
+        return None
+    return EventoSalud.objects.create(
+        animal=animal,
+        tipo=tipo,
+        fecha=fecha,
+        nombre_veterinario=veterinario,
+        observaciones=observaciones,
+    )
+
+
 @transaction.atomic
-def registrar_ingreso_compra(*, finca, animal, proveedor, fecha_compra, documento_compra="", precio_individual=None, peso_inicial=None, potrero_inicial=None, observaciones=""):
+def registrar_ingreso_compra(*, finca, animal, proveedor, fecha_compra, documento_compra="", precio_individual=None, peso_inicial=None, potrero_inicial=None, salud_inicial_tipo="", salud_inicial_fecha=None, salud_inicial_veterinario="", salud_inicial_observaciones="", observaciones=""):
     animal.finca = finca
     animal.save()
 
@@ -59,11 +72,19 @@ def registrar_ingreso_compra(*, finca, animal, proveedor, fecha_compra, document
             observaciones="Ubicación inicial registrada durante el ingreso.",
         )
 
+    _crear_evaluacion_salud(
+        animal=animal,
+        tipo=salud_inicial_tipo,
+        fecha=salud_inicial_fecha,
+        veterinario=salud_inicial_veterinario,
+        observaciones=salud_inicial_observaciones,
+    )
+
     return animal
 
 
 @transaction.atomic
-def registrar_ingreso_nacimiento(*, finca, animal, madre, padre=None, fecha_parto, tipo_parto, peso_inicial=None, potrero_inicial=None, observaciones="", creado_por=None):
+def registrar_ingreso_nacimiento(*, finca, animal, madre, padre=None, fecha_parto, tipo_parto, peso_inicial=None, potrero_inicial=None, salud_inicial_tipo="", salud_inicial_fecha=None, salud_inicial_veterinario="", salud_inicial_observaciones="", observaciones="", creado_por=None):
     animal.finca = finca
     animal.madre = madre
     animal.padre = padre
@@ -116,5 +137,13 @@ def registrar_ingreso_nacimiento(*, finca, animal, madre, padre=None, fecha_part
             activo=True,
             observaciones="Ubicación inicial registrada durante el nacimiento.",
         )
+
+    _crear_evaluacion_salud(
+        animal=animal,
+        tipo=salud_inicial_tipo,
+        fecha=salud_inicial_fecha,
+        veterinario=salud_inicial_veterinario,
+        observaciones=salud_inicial_observaciones,
+    )
 
     return animal
