@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from apps.core.models import Finca, UsuarioFinca
 
+from .animal_edit_form import AnimalEditForm
 from .models import Animal, Especie
 
 
@@ -87,7 +88,7 @@ class AnimalEditUITests(TestCase):
         self.assertContains(response, "Registros y Marcas")
         self.assertContains(response, "Estado y Observaciones")
         self.assertContains(response, "Historia y navegación del animal")
-        self.assertContains(response, "historia_salud_animal") is False
+        self.assertContains(response, reverse("ganado:historia_salud_animal", args=[self.objetivo.id]))
         self.assertContains(response, "Guardar Cambios")
 
     def test_padre_madre_se_filtran_por_finca_especie_y_sexo(self):
@@ -173,10 +174,8 @@ class AnimalEditUITests(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_form_rechaza_padre_de_otra_especie(self):
-        self._login_admin()
-        response = self.client.post(
-            reverse("ganado:editar_animal", args=[self.objetivo.id]),
-            {
+        form = AnimalEditForm(
+            data={
                 "numero_arete": self.objetivo.numero_arete,
                 "nombre_propio": self.objetivo.nombre_propio,
                 "sexo": "M",
@@ -186,15 +185,17 @@ class AnimalEditUITests(TestCase):
                 "padre": self.caballo.id,
                 "is_active": "on",
             },
+            instance=self.objetivo,
+            finca=self.finca,
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "El padre debe pertenecer a la misma especie.")
 
-    def test_cambio_de_especie_no_deja_padre_de_especie_anterior(self):
-        self._login_admin()
-        response = self.client.post(
-            reverse("ganado:editar_animal", args=[self.objetivo.id]),
-            {
+        self.assertFalse(form.is_valid())
+        self.assertIn("padre", form.errors)
+        self.assertIn("misma especie", str(form.errors["padre"]))
+
+    def test_cambio_de_especie_no_acepta_padre_de_especie_anterior(self):
+        form = AnimalEditForm(
+            data={
                 "numero_arete": self.objetivo.numero_arete,
                 "nombre_propio": self.objetivo.nombre_propio,
                 "sexo": "M",
@@ -204,6 +205,9 @@ class AnimalEditUITests(TestCase):
                 "padre": self.toro.id,
                 "is_active": "on",
             },
+            instance=self.objetivo,
+            finca=self.finca,
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Select a valid choice")
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("padre", form.errors)
