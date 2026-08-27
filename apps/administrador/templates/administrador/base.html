@@ -1,25 +1,29 @@
-{% load static %}
+{% extends "administrador/base_root.html" %}
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Hato{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'administrador/css/dashboard.css' %}">
-</head>
-<body data-theme="noche">
+{% block estructura_principal %}
 <header class="topbar">
-    <div class="brand">🐄 Hato</div>
-    <div class="user-area">
+    <div class="brand flex items-center gap-2">🐄 Hato</div>
+
+    <div class="hidden md:flex flex-col text-center">
+        <span class="text-[10px] uppercase tracking-widest font-bold" style="color:var(--hato-text-muted);">📍 Operando en:</span>
+        <strong class="text-sm" style="color:var(--hato-text-strong);">{{ finca.nombre|default:"Seleccione Finca" }}</strong>
+    </div>
+
+    <div class="user-area flex items-center gap-3">
         {% if user.is_authenticated %}
-            <span>{{ user.username }}</span>
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background:var(--hato-primary-strong);">
+                    {{ user.username|make_list|first|upper }}
+                </div>
+                <span>{{ user.username }}</span>
+            </div>
             {% if user.is_superuser %}
-                <span class="badge" style="background:var(--hato-primary-strong);color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;margin-left:5px;font-weight:800;">ROOT</span>
+                <span class="badge" style="background:var(--hato-primary-strong);color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:800;">ROOT</span>
             {% endif %}
         {% else %}
             <span>Hato AI Lab</span>
         {% endif %}
+
         <details class="theme-picker">
             <summary>🎨 Apariencia</summary>
             <div class="theme-picker-panel">
@@ -80,6 +84,8 @@
     </main>
 </div>
 
+{% endblock %}
+
+{% block extra_scripts %}
 <script src="{% static 'administrador/js/dashboard.js' %}"></script>
-</body>
-</html>
+{% endblock %}
