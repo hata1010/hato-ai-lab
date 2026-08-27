@@ -1,0 +1,17 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hato{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'administrador/css/dashboard.css' %}">
+    <!-- Capa visual reutilizable: las pantallas pueden usar utilidades Tailwind sin duplicar el documento raíz. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body data-theme="noche">
+    {% block estructura_principal %}{% endblock %}
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
