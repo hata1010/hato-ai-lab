@@ -44,8 +44,6 @@
                 <li><a href="{% url 'ganado:lista_movilidad' %}" class="flex items-center gap-3 px-3 py-2 text-sm rounded transition {% if 'movilidad' in request.path %}bg-blue-600 text-white shadow-sm font-medium{% else %}text-gray-300 hover:bg-[#4b545c] hover:text-white{% endif %}">📍 Movilidad</a></li>
                 <li><a href="{% url 'ganado:lista_pesajes' %}" class="flex items-center gap-3 px-3 py-2 text-sm rounded transition {% if 'pesajes' in request.path %}bg-blue-600 text-white shadow-sm font-medium{% else %}text-gray-300 hover:bg-[#4b545c] hover:text-white{% endif %}">⚖️ Pesajes</a></li>
                 <li><a href="{% url 'ganado:lista_salud' %}" class="flex items-center gap-3 px-3 py-2 text-sm rounded transition {% if 'salud' in request.path %}bg-blue-600 text-white shadow-sm font-medium{% else %}text-gray-300 hover:bg-[#4b545c] hover:text-white{% endif %}">🩺 Salud</a></li>
-                <li><a href="{% url 'ganado:tablero_reproduccion' %}" class="flex items-center gap-3 px-3 py-2 text-sm rounded transition {% if 'reproduccion' in request.path %}bg-blue-600 text-white shadow-sm font-medium{% else %}text-gray-300 hover:bg-[#4b545c] hover:text-white{% endif %}">🍼 Reproducción</a></li>
-                <li><a href="{% url 'ganado:lista_compras' %}" class="flex items-center gap-3 px-3 py-2 text-sm rounded transition {% if 'compras' in request.path %}bg-blue-600 text-white shadow-sm font-medium{% else %}text-gray-300 hover:bg-[#4b545c] hover:text-white{% endif %}">🛒 Adquisiciones</a></li>
             </ul>
             <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-500 border-t border-gray-700 mt-2 mb-1">Módulo Producción</div>
             <ul class="space-y-1">
